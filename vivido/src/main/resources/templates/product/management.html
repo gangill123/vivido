@@ -2,7 +2,19 @@
 <html lang="en">
 	<html xmlns:th="http://www.thymeleaf.org">
 
-<head th:replace="layout/header :: head (VIVIDO)"></head>
+<head th:replace="layout/header :: head (VIVIDO)">
+	<style>
+		/* 테이블 셀 내에서 텍스트가 줄바꿈되지 않도록 설정 */
+		.table th, .table td {
+		    white-space: nowrap; /* 줄바꿈 방지 */
+		    text-align: center;   /* 텍스트를 가운데 정렬 */
+		}
+	</style>
+
+	
+	
+</head>
+
 <body id="page-top">
 
     <!-- Page Wrapper -->
@@ -17,7 +29,137 @@
 
             <!-- Main Content -->
          <main th:replace="layout/main :: main"></main>
-<!--  컨텐츠 작성란 -->		 
+		<!--  컨텐츠 작성란 -->	
+	<div class="card-body" style="background-color: white;">
+		
+				
+	<div class="container-fluid">
+		<div class="card shadow mb-4">
+			<div class="card-header py-3"><h1>상품목록</h1></div>
+				<div class="table-responsive">
+					<table class="table table-bordered dataTable" id="productTable">			                
+							<thead>
+			                    <tr>
+									<th class="sorting sorting_asc" tabindex="0" aria-controls="dataTable" rowspan="1" colspan="1" aria-sort="ascending" aria-label="Name: activate to sort column descending" style="width: 148px;">상품ID</th>
+									<th style="white-space: nowrap; text-align: center;">상품명</th>
+									<th style="white-space: nowrap; text-align: center;">가격</th>
+									<th style="white-space: nowrap; text-align: center;">카테고리</th>
+									<th style="white-space: nowrap; text-align: center;">카테고리 세분류</th>
+									<th style="white-space: nowrap; text-align: center;">키워드</th>
+									<th style="white-space: nowrap; text-align: center;">할인율</th>
+									<th style="white-space: nowrap; text-align: center;">재고수량</th>
+									<th style="white-space: nowrap; text-align: center;">상품옵션</th>
+									<th style="white-space: nowrap; text-align: center;">상품 내용</th>
+									<th style="white-space: nowrap; text-align: center;">상품 브랜드</th>
+									<th style="white-space: nowrap; text-align: center;">상품 제조사</th>
+									<th style="white-space: nowrap; text-align: center;">상품 원산지</th>
+									<th style="white-space: nowrap; text-align: center;">상품 상태</th>
+									<th style="white-space: nowrap; text-align: center;">배송 방법</th>
+									<th style="white-space: nowrap; text-align: center;">택배 회사</th>
+									<th style="white-space: nowrap; text-align: center;">배송비</th>
+									<th style="white-space: nowrap; text-align: center;">출고지</th>
+									<th style="white-space: nowrap; text-align: center;">상품 등록일자</th>
+									<th style="white-space: nowrap; text-align: center;">상품 수정일자</th>
+									<th style="white-space: nowrap; text-align: center;">승인일자</th>
+									<th style="white-space: nowrap; text-align: center;">승인자</th>
+									<th style="white-space: nowrap; text-align: center;">비고</th>
+									<th style="white-space: nowrap; text-align: center;">수정</th>
+									<th style="white-space: nowrap; text-align: center;">삭제</th>					
+								</tr>
+			                </thead>                        
+			            <tbody>
+							
+						</tbody>
+					</table>
+			</div> 
+		</div>                      
+	</div>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+		<script>
+		    $(document).ready(function () {
+		        // 전체 상품 조회 API 호출
+		        $.ajax({
+		            url: "/management/products",  // 상품 목록을 가져오는 API 엔드포인트
+		            type: "GET",
+		            dataType: "json",
+		            success: function (data) {
+		                let tableContent = "";
+		                data.forEach(function (product) {
+		                    tableContent += `
+		                        <tr>
+									<td>${product.productId}</td>
+									<td>${product.productName}</td>
+									<td>${product.productPrice} 원</td>
+									<td>${product.productCategory}</td>
+									<td>${product.productCategoryDetails}</td>
+									<td>${product.productKeyword}</td>
+									<td>${product.discountRate}%</td>
+									<td>${product.productStock}</td>
+									<td>${product.productOptionId ? '옵션 있음' : '옵션 없음'}</td>
+									<td>${product.productContent}</td>
+									<td>${product.brand}</td>
+									<td>${product.manufacturer}</td>
+									<td>${product.productOrigin}</td>
+									<td>${product.productStatus}</td>
+									<td>${product.deliveryMethod}</td>
+									<td>${product.deliveryCompany}</td>
+									<td>${product.deliveryPrice} 원</td>
+									<td>${product.address}</td>
+									<td>${product.createDate}</td>
+									<td>${product.updateDate}</td>
+									<td>${product.approvalDate}</td>
+									<td>${product.approvalId}</td>
+									<td>${product.comments}</td>
+		                            <td>
+										<button class="btn btn-warning btn-icon-split" onclick="editProduct('${product.productId}')">수정</button>
+									</td>
+									<td>
+										<button class="btn btn-danger btn-icon-split" onclick="deleteProduct('${product.productId}')">삭제</button>
+		                            </td>
+		                        </tr>
+		                    `;
+		                });
+		                // 테이블의 tbody에 데이터를 삽입
+		                $("#productTable tbody").html(tableContent);
+		            },
+		            error: function () {
+		                alert("상품 목록을 불러오는 데 실패했습니다.");
+		            }
+		        });
+		    });
+
+			// 상품 수정 함수 (추가 구현 필요)
+			function editProduct(productId) {
+			    alert("상품 수정: " + productId);
+			    // 수정 페이지로 이동하거나 모달 창을 띄우는 기능을 추가예정
+			}
+			
+			// 상품 삭제 함수 (확인창 포함)
+			function deleteProduct(productId) {
+			    if (confirm("정말 삭제하시겠습니까?")) {
+			        $.ajax({
+			            url: "/management/products/" + productId,
+			            type: "DELETE",
+			            success: function () {
+			                alert("상품이 삭제되었습니다.");
+			                location.reload(); // 삭제 후 새로고침
+			            },
+			            error: function () {
+			                alert("상품 삭제에 실패했습니다.");
+			            }
+			        });
+			    }
+			}
+
+
+		</script>
+			
+			
+		
+		
+			
+		</div>
+<!--  컨텐츠 작성란 -->	 
 		 
 
 	<div class="card shadow mb-4">
@@ -81,6 +223,9 @@
             </div>
         </div>
     </div>
+	
+
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <!-- Bootstrap core JavaScript-->
     <script src="/bootstrap/vendor/jquery/jquery.min.js"></script>
