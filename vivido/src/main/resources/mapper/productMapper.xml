@@ -1,9 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.vivido.mapper.EmployeeMapper">
-
-    
+<mapper namespace="com.vivido.mapper.productMapper">
+	<!-- 전체 상품 조회 -->
+	<select id="getAllProducts" resultType="com.vivido.domain.ProductVO">
+		SELECT * FROM products
+	</select>
+	<!-- 특정 상품 조회 -->
+	<select id="getProductById" parameterType="String"
+		resultType="com.vivido.domain.ProductVO">
+		SELECT * FROM products WHERE product_id = #{productId}
+	</select>
+	<!-- 상품 삭제 -->
+    <delete id="deleteProductById" parameterType="String">
+        DELETE FROM products WHERE product_id = #{productId};
+    </delete>
+	
 
 </mapper>

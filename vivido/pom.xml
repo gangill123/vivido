@@ -28,7 +28,7 @@
 	</scm>
 		<properties>
 			<maven-jar-plugin.version>3.1.1</maven-jar-plugin.version>
-			<java.version>11</java.version>
+			<java.version>17</java.version>
 		</properties>
 	<dependencies>
 		<dependency>
@@ -80,6 +80,7 @@
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.24</version> <!-- 최신 버전으로 수정 가능 -->
 			<scope>provided</scope>
 		</dependency>
 
@@ -120,6 +121,9 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 		</dependency>
+		
+		
+		
 		
 	</dependencies>
 
