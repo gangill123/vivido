@@ -1,5 +1,6 @@
 package com.vivido.repository;
 
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.ibatis.session.SqlSession;
@@ -39,8 +40,13 @@ public class ProductDAOImpl implements ProductDAO {
 		return sqlSession.update(NAMESPACE + ".updateProduct", product);
 	}
 	@Override
-	public List<ProductVO> selectProducts() {
-		return sqlSession.selectList(NAMESPACE + ".selectProducts");
+	public List<ProductVO> selectProducts(int offset, int pageSize) {
+	    // OFFSET과 LIMIT을 사용하여 페이징 처리된 데이터 조회
+	    return sqlSession.selectList(NAMESPACE + ".selectProducts", 
+	                                 new HashMap<String, Integer>() {{
+	                                     put("offset", offset);
+	                                     put("pageSize", pageSize);
+	                                 }});
 	}
 	
 	// 상품 총 개수 조회

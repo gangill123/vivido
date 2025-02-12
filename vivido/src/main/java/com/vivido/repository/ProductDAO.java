@@ -16,7 +16,7 @@ public interface ProductDAO {
 	// 상품 정보 수정
 	public int updateProduct(ProductVO product);
 
-	public List<ProductVO> selectProducts();
+	public List<ProductVO> selectProducts(int offset, int pageSize);
 	
 	public int getTotalProductCount();
 

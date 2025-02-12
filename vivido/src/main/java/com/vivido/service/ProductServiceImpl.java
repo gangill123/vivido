@@ -1,10 +1,11 @@
 package com.vivido.service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.vivido.domain.ProductVO;
@@ -37,28 +38,47 @@ public class ProductServiceImpl implements ProductService {
 		return productDAO.updateProduct(product);
 	}
 	
+	// 상품 목록 페이징 처리
+	
 	@Override
-	public List<ProductVO> getProducts(int pageNum, int pageSize) {
-		// 페이징 처리 시작
-		PageHelper.startPage(pageNum, pageSize);
+    public Map<String, Object> getProducts(int pageNum, int pageSize) {
+		 // 1. 전체 데이터 개수 계산
+        int totalItems = productDAO.getTotalProductCount();
 
-		// 데이터 조회
-		List<ProductVO> products = productDAO.selectProducts();
+        // 2. 전체 페이지 수 계산 (올림 처리)
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
 
-		// PageInfo로 페이징 정보 반환
-		PageInfo<ProductVO> pageInfo = new PageInfo<>(products);
+        // 3. 현재 페이지 번호가 유효한지 확인
+        pageNum = (pageNum > 0) ? pageNum : 1;
+        pageNum = (pageNum > totalPages) ? totalPages : pageNum;
 
-		// PageInfo에서 실제 데이터 리스트를 반환
-		return pageInfo.getList();
-	}
+        // 4. OFFSET 계산 (현재 페이지에서 데이터를 추출)
+        int offset = (pageNum - 1) * pageSize;
+
+        // 5. 해당 페이지에 해당하는 데이터 조회
+        List<ProductVO> products = productDAO.selectProducts(offset, pageSize);
+
+        // 6. 페이징 정보를 포함한 결과 반환
+        Map<String, Object> response = new HashMap<>();
+        response.put("products", products);  // 실제 데이터 리스트
+        response.put("totalPages", totalPages);  // 총 페이지 수
+        response.put("currentPage", pageNum);  // 현재 페이지
+        response.put("pageSize", pageSize);  // 페이지당 항목 수
+        response.put("totalItems", totalItems);  // 총 항목 수
+
+        return response;
+    
+    }
 	
 	@Override
 	public int getTotalPages(int pageSize) {
-		// 전체 데이터 개수 조회
-		int totalRecords = productDAO.getTotalProductCount();
+		  // 전체 데이터 개수 조회 (이 부분은 ProductDAO에서 처리)
+	    int totalItems = productDAO.getTotalProductCount();  // 전체 데이터 개수를 조회하는 메서드 호출
 
-		// 전체 페이지 수 계산
-		return (int) Math.ceil((double) totalRecords / pageSize);
+	    // 총 페이지 수 계산 (전체 데이터 개수를 pageSize로 나누고 올림 처리)
+	    int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+	    
+	    return totalPages;
 	}
 
 }
