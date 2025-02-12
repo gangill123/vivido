@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.vivido.domain.ProductVO;
 import com.vivido.service.ProductService;
 
@@ -27,25 +29,16 @@ public class ProductRestController {
 	private ProductService productService;
 
 	// 전체 상품 조회 API
-	@GetMapping
-	public ResponseEntity<Map<String, Object>> getAllProducts(
-	    @RequestParam(value = "page", defaultValue = "1") int pageNum,
-	    @RequestParam(value = "size", defaultValue = "10") int pageSize) {
+	  @GetMapping
+	    public ResponseEntity<Map<String, Object>> getAllProducts(
+	        @RequestParam(value = "page", defaultValue = "1") int pageNum,
+	        @RequestParam(value = "size", defaultValue = "15") int pageSize) {
 
-	    // 페이징 처리된 상품 목록 조회
-	    List<ProductVO> products = productService.getProducts(pageNum, pageSize);
+	        // 상품 목록과 페이징 정보 가져오기
+	        Map<String, Object> response = productService.getProducts(pageNum, pageSize);
 
-	    // 총 페이지 수 계산
-	    int totalPages = productService.getTotalPages(pageSize);
-
-	    // 응답할 데이터 구성
-	    Map<String, Object> response = new HashMap<>();
-	    response.put("products", products);
-	    response.put("totalPages", totalPages);
-	    response.put("currentPage", pageNum);
-
-	    return new ResponseEntity<>(response, HttpStatus.OK);
-	}
+	        return ResponseEntity.ok(response);
+	    }
 	
 	// 상품 삭제 API (DELETE /management/products/{productId})
 	@DeleteMapping("/{productId}")

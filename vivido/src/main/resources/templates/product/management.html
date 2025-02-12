@@ -64,30 +64,43 @@
 			    }
 			}
 			
-			
-			.pagination {
-			    text-align: center;
-			    margin-top: 20px;
+			/* 전체 페이지를 위한 스타일 */
+			#pagination {
+			    position: absolute;               /* 고정 위치로 설정 */
+			    bottom: 0;                     /* 화면 하단에 딱 맞춰 배치 */
+			    left: 50%;                     /* 화면의 가로 중앙 */
+			    transform: translateX(-50%);   /* 정확한 중앙 정렬 */
+			    display: flex;
+			    justify-content: center;       /* 수평 중앙 정렬 */
+			    align-items: center;           /* 수직 중앙 정렬 */
+			    background-color: #fff;        /* 배경색을 추가하여 버튼들이 더 잘 보이게 할 수 있음 */
+			    padding: 10px 0;               /* 상하 여백을 추가 */
+			    box-shadow: 0 -1px 5px rgba(0, 0, 0, 0.1); /* 하단에 그림자 추가 (선택사항) */
 			}
 
-			.pagination button {
-			    padding: 5px 10px;
+			/* 각 버튼 스타일 */
+			#pagination button {
+			    padding: 8px 16px;
 			    margin: 0 5px;
-			    background-color: #007bff;
-			    color: white;
-			    border: none;
+			    font-size: 16px;
 			    cursor: pointer;
-			    border-radius: 5px;
+			    border: 1px solid #ccc;
+			    background-color: #f8f8f8;
 			}
 
-			.pagination button:hover {
-			    background-color: #0056b3;
+			#pagination button:disabled {
+			    background-color: #e0e0e0;
+			    cursor: not-allowed;
 			}
 
-			#productTable th, #productTable td {
-			    padding: 10px;
-			    text-align: center;
+			/* 페이지 정보 */
+			#pagination #pageInfo {
+			    font-size: 16px;
+			    margin: 0 10px;
 			}
+
+
+
 		
 				
 		</style>
@@ -184,14 +197,17 @@
 	</div>
 	
 	
-	<!-- 페이징 버튼 -->
-	<div class="pagination">
-	    <button id="firstPage" onclick="changePage(1)">처음</button>
-	    <button id="prevPage" onclick="changePage(currentPage - 1)">이전</button>
-	    <span id="pageInfo">페이지 1</span>
-	    <button id="nextPage" onclick="changePage(currentPage + 1)">다음</button>
-	    <button id="lastPage" onclick="changePage(totalPages)">끝</button>
+	<div id="pagination">
+	    <button id="firstPage" disabled="disabled"><<</button>
+	    <button id="prevPage" disabled="disabled"><</button>
+	    <span id="pageInfo"></span>
+	    <button id="nextPage">></button>
+	    <button id="lastPage">>></button>
 	</div>
+
+	<!-- 상품 목록을 표시할 div -->
+	<div id="productListContainer"></div>
+
 	
 	
 	
@@ -200,22 +216,23 @@
 			let currentPage = 1;
 			let totalPages = 10;
 
-			// 상품 목록 및 페이징 처리 함수
-			function loadProducts(pageNum) {
+			// 상품 목록 로드 함수
+			function loadProductList(pageNum) {
 			    $.ajax({
 			        url: "/management/products",  // 전체 상품 조회 API
 			        type: "GET",
 			        data: {
 			            page: pageNum,  // 현재 페이지 번호
-			            size: 10         // 페이지당 항목 수
+			            size: 15        // 페이지당 항목 수
 			        },
 			        dataType: "json",
 			        success: function(response) {
-			            // 응답 받은 데이터로 테이블 채우기
+			            // 응답 데이터 처리
 			            const products = response.products;
 			            totalPages = response.totalPages;
 			            currentPage = response.currentPage;
 
+			            // 테이블 내용 생성
 			            let tableContent = "";
 			            products.forEach(function (product) {
 			                tableContent += `
@@ -252,20 +269,22 @@
 			                    </tr>
 			                `;
 			            });
-			            // 테이블의 tbody에 데이터를 삽입
+			            // 테이블 업데이트
 			            $("#productTable tbody").html(tableContent);
 
 			            // 페이징 UI 업데이트
 			            updatePaginationUI(currentPage, totalPages);
 			        },
-			        error: function () {
+			        error: function (xhr, status, error) {
+			            console.error("상품 목록 로드 오류:", error);
 			            alert("상품 목록을 불러오는 데 실패했습니다.");
 			        }
 			    });
 			}
 
-			// 페이징 UI 업데이트
+			// 페이징 UI 업데이트 함수
 			function updatePaginationUI(currentPage, totalPages) {
+			    // 페이지 정보 표시
 			    $("#pageInfo").text(`페이지 ${currentPage} / ${totalPages}`);
 
 			    // 페이지 이동 버튼 활성화/비활성화 처리
@@ -281,13 +300,31 @@
 			        return; // 잘못된 페이지 번호일 경우 실행하지 않음
 			    }
 			    currentPage = pageNum;
-			    loadProducts(currentPage);  // 해당 페이지의 상품 목록을 불러옴
+			    loadProductList(currentPage);  // 해당 페이지의 상품 목록을 불러옴
 			}
 
-			// 페이지 로딩 시 기본 1페이지 상품 목록 불러오기
+			// 페이지 로딩 시 1페이지 상품 목록 불러오기
 			$(document).ready(function() {
-			    loadProducts(currentPage);
+			    loadProductList(currentPage);
 			});
+
+			// 페이지 이동 버튼 이벤트 바인딩
+			$("#firstPage").on("click", function() {
+			    changePage(1);
+			});
+
+			$("#prevPage").on("click", function() {
+			    changePage(currentPage - 1);
+			});
+
+			$("#nextPage").on("click", function() {
+			    changePage(currentPage + 1);
+			});
+
+			$("#lastPage").on("click", function() {
+			    changePage(totalPages);
+			});
+
 
 			// 상품 수정 함수 (추가 구현 필요)
 			// 수정 모달 열기
@@ -382,63 +419,6 @@
 
 		</script>
 			
-			
-		
-		<script>
-		    let currentPage = 0;
-		    let totalPages = 0;
-
-		    // 페이지 로드 시 데이터 불러오기
-		    function loadPage(page) {
-		        fetch(`/products?page=${page}`)
-		            .then(response => response.json())
-		            .then(data => {
-		                totalPages = data.totalPages; // 전체 페이지 수
-		                currentPage = data.number; // 현재 페이지
-		                updateTable(data.content); // 테이블 업데이트
-		                updatePageInfo(); // 페이지 정보 업데이트
-		            });
-		    }
-
-		    // 테이블에 데이터를 동적으로 삽입
-		    function updateTable(products) {
-		        const tableBody = document.querySelector('#productTable tbody');
-		        tableBody.innerHTML = ''; // 기존 데이터 지우기
-
-		        products.forEach(product => {
-		            const row = document.createElement('tr');
-		            row.innerHTML = `
-		                <td>${product.productId}</td>
-		                <td>${product.productName}</td>
-		                <td>${product.price}</td>
-		                <td>${product.category}</td>
-		                <td>${product.categoryDetails}</td>
-		                <td>${product.keyword}</td>
-		                <td>${product.discount}</td>
-		                <td>${product.stockQuantity}</td>
-		                <td>${product.productContent}</td>
-		            `;
-		            tableBody.appendChild(row);
-		        });
-		    }
-
-		    // 페이지 정보 업데이트
-		    function updatePageInfo() {
-		        document.getElementById('pageInfo').textContent = `페이지 ${currentPage + 1} / ${totalPages}`;
-		    }
-
-		    // 페이지 이동
-		    function goToPage(page) {
-		        if (page < 0 || page >= totalPages) return;
-		        loadPage(page);
-		    }
-
-		    // 페이지 로드 시 첫 번째 페이지 데이터 불러오기
-		    window.onload = function() {
-		        loadPage(0);
-		    };
-		</script>
-		
 		
 		
 		

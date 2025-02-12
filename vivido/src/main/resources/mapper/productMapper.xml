@@ -49,10 +49,8 @@
     
 		    <!-- 페이징 처리 쿼리 -->
 		<select id="selectProducts" resultType="com.vivido.domain.ProductVO">
-		    SELECT *
-		    FROM products
-		    ORDER BY product_id
-		    LIMIT #{pageNum}, #{pageSize}
+			  SELECT * FROM products
+			    LIMIT #{pageSize} OFFSET #{offset}; <!-- OFFSET과 LIMIT을 사용하여 페이징 처리 -->
 		</select>
 		
 		    <!-- 상품 총 개수 조회 -->
