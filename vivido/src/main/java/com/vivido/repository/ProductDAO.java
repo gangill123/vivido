@@ -19,5 +19,13 @@ public interface ProductDAO {
 	public List<ProductVO> selectProducts(int offset, int pageSize);
 	
 	public int getTotalProductCount();
+	
+	List<ProductVO> searchProducts(ProductVO productVO);
+
+	public List<String> getSubcategoriesByCategory(String productCategory);
+
+	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
+	
+	
 
 }

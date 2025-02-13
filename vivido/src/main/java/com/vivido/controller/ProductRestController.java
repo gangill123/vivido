@@ -1,10 +1,12 @@
 package com.vivido.controller;
 
+import java.sql.Timestamp;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,12 +16,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.vivido.domain.ProductVO;
 import com.vivido.service.ProductService;
+
+import ch.qos.logback.core.model.Model;
 
 @RestController
 @RequestMapping("/management/products")
@@ -32,7 +37,7 @@ public class ProductRestController {
 	  @GetMapping
 	    public ResponseEntity<Map<String, Object>> getAllProducts(
 	        @RequestParam(value = "page", defaultValue = "1") int pageNum,
-	        @RequestParam(value = "size", defaultValue = "15") int pageSize) {
+	        @RequestParam(value = "size", defaultValue = "10") int pageSize) {
 
 	        // 상품 목록과 페이징 정보 가져오기
 	        Map<String, Object> response = productService.getProducts(pageNum, pageSize);
@@ -77,6 +82,51 @@ public class ProductRestController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("상품 수정 실패");
         }
+    }
+    
+ // 검색 API
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductVO>> searchProducts(
+        @RequestParam(value = "product_name", required = false) String productName,
+        @RequestParam(value = "product_id", required = false) String productId,
+        @RequestParam(value = "keyword", required = false) String keyword,
+        @RequestParam(value = "create_date", required = false) String createDate) {
+
+        // ProductVO 객체 생성하여 검색 조건 설정
+        ProductVO productVO = new ProductVO();
+        productVO.setProductName(productName);
+        productVO.setProductId(productId);
+        productVO.setProductKeyword(keyword);
+
+        // create_date가 유효하면 Timestamp로 변환
+        if (createDate != null && !createDate.isEmpty()) {
+            try {
+                // "yyyy-MM-dd" 형식의 문자열을 Timestamp로 변환
+                Timestamp timestamp = Timestamp.valueOf(createDate + " 00:00:00");
+                productVO.setCreateDate(timestamp);
+            } catch (IllegalArgumentException e) {
+                // 잘못된 날짜 형식에 대한 예외 처리
+                System.out.println("Invalid date format: " + createDate);
+            }
+        }
+
+        // 페이징 없이 모든 조건에 맞는 상품 목록을 가져옴
+        List<ProductVO> productList = productService.searchProducts(productVO);
+
+        return ResponseEntity.ok(productList);
+    }
+    
+    @GetMapping("/getSubcategories")
+    public List<String> getSubcategories(@RequestParam String productCategory) {
+        // 카테고리로 해당 물품 정보 반환
+        return productService.getSubcategoriesByCategory(productCategory);
+    }
+    
+    @GetMapping("/searchProducts")
+    public List<ProductVO> searchProducts(@RequestParam String productCategory, @RequestParam String productCategoryDetails) {
+        // 카테고리와 세분류에 맞는 상품 정보를 가져옴
+        List<ProductVO> products = productService.getProductsByCategoryAndSubcategory(productCategory, productCategoryDetails);
+        return products;  // 상품 목록을 JSON 형태로 반환
     }
 	
 

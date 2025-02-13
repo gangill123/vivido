@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 	<html xmlns:th="http://www.thymeleaf.org">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 	<style>
 			/* 테이블 셀 내에서 텍스트가 줄바꿈되지 않도록 설정 */
@@ -129,6 +130,50 @@
 		<!--  컨텐츠 작성란 -->	
 	<div class="card-body" style="background-color: white;">
 		
+		<h1>상품목록</h1>
+		    <form>
+		        <!-- 카테고리 선택 -->
+		        <label>검색 분류:</label>
+		        <select id="category" name="category">
+		            <option value="">카테고리 선택</option>
+		            <option value="product_name">상품명</option>
+		            <option value="product_id">상품 ID</option>
+		            <option value="keyword">키워드</option>
+		            <option value="create_date">상품등록일</option>
+		        </select>
+
+		        <!-- 검색창 -->
+		        <input type="text" id="search-input" placeholder="검색어 입력" disabled>
+
+		        <!-- 등록일 입력창 -->
+		        <input type="date" id="date-input" disabled>
+		        
+		        <button type="button" id="searchBtn">검색</button>
+		    </form>
+
+		    <div id="searchResult">
+		        <!-- 검색 결과 표시 영역 -->
+		    </div>
+	
+			<!-- 카테고리 선택 -->
+			          <label for="categorySelect">카테고리:</label>
+			          <select id="categorySelect" class="form-control">
+			              <option value="">카테고리를 선택하세요</option>
+			              <option value="전자기기">전자기기</option>
+			              <option value="패션">패션</option>
+			              <option value="가전">가전</option>
+			          </select>
+
+			          <!-- 서브카테고리 선택 -->
+			          <label for="subcategorySelect">세분류:</label>
+			          <select id="subcategorySelect" class="form-control" disabled>
+			              <option value="">먼저 카테고리를 선택하세요</option>
+			          </select>
+		
+		
+		
+		
+		
 				
 	<div class="container-fluid">
 		<div class="card shadow mb-4">
@@ -166,7 +211,7 @@
 									<th style="white-space: nowrap; text-align: center;">삭제</th>					
 								</tr>
 			                </thead>                        
-			            <tbody>
+			            <tbody id="productList">
 							
 						</tbody>
 					</table>
@@ -223,7 +268,7 @@
 			        type: "GET",
 			        data: {
 			            page: pageNum,  // 현재 페이지 번호
-			            size: 15        // 페이지당 항목 수
+			            size: 10        // 페이지당 항목 수
 			        },
 			        dataType: "json",
 			        success: function(response) {
@@ -418,10 +463,190 @@
 
 
 		</script>
+		
+		
+		<!--상품 검색 api-->
+		<script>
+			$(document).ready(function() {
+			    // 카테고리 선택 시
+			    $('#categorySelect').on('change', function() {
+			        var category = $(this).val();
+
+			        // 서브카테고리 옵션 초기화
+			        $('#subcategorySelect').prop('disabled', !category); // 카테고리 선택되면 서브카테고리 활성화
+
+			        // 서브카테고리 옵션 업데이트
+			        if (category) {
+			            $('#subcategorySelect').html(`
+			                <option value="">세분류를 선택하세요</option>
+			                <option value="스마트폰">스마트폰</option>
+			                <option value="노트북">노트북</option>
+			            `);
+			        } else {
+			            $('#subcategorySelect').html('<option value="">먼저 카테고리를 선택하세요</option>');
+			        }
+			    });
+
+			    // 서브카테고리 선택 시
+			    $('#subcategorySelect').on('change', function() {
+			        var category = $('#categorySelect').val();
+			        var subcategory = $(this).val();
+
+			        if (category && subcategory) {
+			            $.ajax({
+			                url: 'management/products/searchProducts',
+			                type: 'GET',
+			                data: { productCategory: category, productCategoryDetails: subcategory },
+			                success: function(data) {
+			                    if (data && data.products) {
+			                        renderProductTable(data.products);  // 서버에서 받은 제품 목록을 테이블로 렌더링
+			                    } else {
+			                        $('#productTable tbody').html('<tr><td colspan="24">상품이 없습니다.</td></tr>');
+			                    }
+			                },
+			                error: function() {
+			                    alert('상품 목록을 불러오는 데 실패했습니다.');
+			                }
+			            });
+			        } else {
+			            $('#productTable tbody').html('<tr><td colspan="24">세분류를 선택하세요.</td></tr>');
+			        }
+			    });
+
+			    // 제품 데이터를 테이블에 렌더링하는 함수
+			    function renderProductTable(products) {
+			        var resultHtml = '';
+			        $.each(products, function(index, product) {
+			            resultHtml += '<tr>';
+			            resultHtml += '<td>' + product.productId + '</td>';
+			            resultHtml += '<td>' + product.productName + '</td>';
+			            resultHtml += '<td>' + product.productPrice + ' 원</td>';
+			            resultHtml += '<td>' + product.productCategory + '</td>';
+			            resultHtml += '<td>' + product.productCategoryDetails + '</td>';
+			            resultHtml += '<td>' + product.productKeyword + '</td>';
+			            resultHtml += '<td>' + product.discountRate + '%</td>';
+			            resultHtml += '<td>' + product.productStock + '</td>';
+			            resultHtml += '<td>' + (product.productOptionId ? '옵션 있음' : '옵션 없음') + '</td>';
+			            resultHtml += '<td>' + product.productContent + '</td>';
+			            resultHtml += '<td>' + product.brand + '</td>';
+			            resultHtml += '<td>' + product.manufacturer + '</td>';
+			            resultHtml += '<td>' + product.productOrigin + '</td>';
+			            resultHtml += '<td>' + product.productStatus + '</td>';
+			            resultHtml += '<td>' + product.deliveryMethod + '</td>';
+			            resultHtml += '<td>' + product.deliveryCompany + '</td>';
+			            resultHtml += '<td>' + product.deliveryPrice + ' 원</td>';
+			            resultHtml += '<td>' + product.address + '</td>';
+			            resultHtml += '<td>' + product.createDate + '</td>';
+			            resultHtml += '<td>' + product.updateDate + '</td>';
+			            resultHtml += '<td>' + product.approvalDate + '</td>';
+			            resultHtml += '<td>' + product.approvalId + '</td>';
+			            resultHtml += '<td>' + product.comments + '</td>';
+			            resultHtml += '<td>';
+			            resultHtml += '<button class="btn btn-warning btn-icon-split" onclick="editProduct(\'' + product.productId + '\')">수정</button>';
+			            resultHtml += '</td>';
+			            resultHtml += '<td>';
+			            resultHtml += '<button class="btn btn-danger btn-icon-split" onclick="deleteProduct(\'' + product.productId + '\')">삭제</button>';
+			            resultHtml += '</td>';
+			            resultHtml += '</tr>';
+			        });
+			        $("#productTable tbody").html(resultHtml);
+			    }
+			});
+
+		   </script>
 			
 		
 		
-		
+	<script>
+		$(document).ready(function() {
+		       // 카테고리 선택 시
+		       $('#categorySelect').on('change', function() {
+		           var category = $(this).val();
+
+		           // 서브카테고리 옵션 초기화
+		           $('#subcategorySelect').prop('disabled', !category); // 카테고리 선택되면 서브카테고리 활성화
+
+		           // 서브카테고리 옵션 업데이트
+		           if (category) {
+		               $('#subcategorySelect').html(`
+		                   <option value="">세분류를 선택하세요</option>
+		                   <option value="스마트폰">스마트폰</option>
+		                   <option value="노트북">노트북</option>
+		               `);
+		           } else {
+		               $('#subcategorySelect').html('<option value="">먼저 카테고리를 선택하세요</option>');
+		           }
+		       });
+
+		       // 서브카테고리 선택 시
+		       $('#subcategorySelect').on('change', function() {
+		           var category = $('#categorySelect').val();
+		           var subcategory = $(this).val();
+
+		           if (category && subcategory) {
+		               $.ajax({
+		                   url: 'management/products/searchProducts',
+		                   type: 'GET',
+		                   data: { productCategory: category, productCategoryDetails: subcategory },
+		                   success: function(data) {
+		                       $('#productList').empty();  // 기존 내용 삭제
+		                       if (data.length > 0) {
+		                           $.each(data, function(index, product) {
+		                               $('#productList').append(
+		                                   `<tr> +
+											<td>${product.productId}</td>
+					                        <td>${product.productName}</td>
+					                        <td>${product.productPrice} 원</td>
+					                        <td>${product.productCategory}</td>
+					                        <td>${product.productCategoryDetails}</td>
+					                        <td>${product.productKeyword}</td>
+					                        <td>${product.discountRate}%</td>
+					                        <td>${product.productStock}</td>
+					                        <td>${product.productOptionId ? '옵션 있음' : '옵션 없음'}</td>
+					                        <td>${product.productContent}</td>
+					                        <td>${product.brand}</td>
+					                        <td>${product.manufacturer}</td>
+					                        <td>${product.productOrigin}</td>
+					                        <td>${product.productStatus}</td>
+					                        <td>${product.deliveryMethod}</td>
+					                        <td>${product.deliveryCompany}</td>
+					                        <td>${product.deliveryPrice} 원</td>
+					                        <td>${product.address}</td>
+					                        <td>${product.createDate}</td>
+					                        <td>${product.updateDate}</td>
+					                        <td>${product.approvalDate}</td>
+					                        <td>${product.approvalId}</td>
+					                        <td>${product.comments}</td>
+					                        <td>
+					                            <button class="btn btn-warning btn-icon-split" onclick="editProduct('${product.productId}')">수정</button>
+					                        </td>
+					                        <td>
+					                            <button class="btn btn-danger btn-icon-split" onclick="deleteProduct('${product.productId}')">삭제</button>
+					                        </td>
+					                    </tr>`
+		                               );
+		                           });
+		                       } else {
+		                           $('#productList').append('<tr><td colspan="24">상품이 없습니다.</td></tr>');
+		                       }
+		                   },
+		                   error: function() {
+		                       alert('상품 목록을 불러오는 데 실패했습니다.');
+		                   }
+		               });
+		           } else {
+		               $('#productList').empty().append('<tr><td colspan="24">세분류를 선택하세요.</td></tr>');
+		           }
+		       });
+		   });
+	</script>
+		   
+		   
+		   
+		   
+		   
+		   
+		   
 			
 		</div>
 <!--  컨텐츠 작성란 -->	 

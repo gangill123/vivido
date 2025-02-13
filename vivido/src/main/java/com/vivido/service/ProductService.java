@@ -19,5 +19,11 @@ public interface ProductService {
     public Map<String, Object> getProducts(int pageNum, int pageSize);
     
     public int getTotalPages(int pageSize);
+    
+    List<ProductVO> searchProducts(ProductVO productVO);
+
+	public List<String> getSubcategoriesByCategory(String productCategory);
+
+	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
 
 }
