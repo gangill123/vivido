@@ -41,4 +41,12 @@ public class ProductVO {
     private String approvalId;  // 승인자 ID
     private String comments;  // 비고
     
+    
+    
+    // 카테고리와 세분류를 받을 수 있는 생성자 추가
+    public ProductVO(String productCategory, String productCategoryDetails) {
+        this.productCategory = productCategory;
+        this.productCategoryDetails = productCategoryDetails;
+    }
+    
 }

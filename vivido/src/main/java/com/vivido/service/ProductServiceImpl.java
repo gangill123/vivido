@@ -80,5 +80,24 @@ public class ProductServiceImpl implements ProductService {
 	    
 	    return totalPages;
 	}
+	
+	
+	// 상품 검색 조회
+	@Override
+	public List<ProductVO> searchProducts(ProductVO productVO) {
+		return productDAO.searchProducts(productVO);
+	}
+	@Override
+	public List<String> getSubcategoriesByCategory(String productCategory) {
+	    // 카테고리에 맞는 세분류를 반환하는 로직
+	    return productDAO.getSubcategoriesByCategory(productCategory);
+	}
+	@Override
+	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails) {
+	    // 카테고리와 세분류에 맞는 상품 정보를 가져오는 로직
+	    return productDAO.getProductsByCategoryAndSubcategory(productCategory, productCategoryDetails);
+	}
+	
+	
 
 }

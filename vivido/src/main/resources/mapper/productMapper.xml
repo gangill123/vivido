@@ -8,56 +8,94 @@
 	</select>
 
 	<!-- 상품 삭제 -->
-    <delete id="deleteProductById" parameterType="String">
-        DELETE FROM products WHERE product_id = #{productId};
-    </delete>
-    
-     <!-- 상품 정보 조회 -->
-    <select id="getProductById" parameterType="String" resultType="com.vivido.domain.ProductVO">
-        SELECT * FROM products WHERE product_id = #{productId}
+	<delete id="deleteProductById" parameterType="String">
+		DELETE FROM products WHERE product_id = #{productId};
+	</delete>
+
+	<!-- 상품 정보 조회 -->
+	<select id="getProductById" parameterType="String"
+		resultType="com.vivido.domain.ProductVO">
+		SELECT * FROM products WHERE product_id = #{productId}
+	</select>
+
+	<!-- 상품 수정 -->
+	<update id="updateProduct" parameterType="com.vivido.domain.ProductVO">
+		UPDATE products <set>
+			<if test="productCategory != null"> product_category =
+		#{productCategory}, </if>
+			<if test="productCategoryDetails != null"> product_category_details
+		= #{productCategoryDetails}, </if>
+			<if test="productKeyword != null"> product_keyword =
+		#{productKeyword}, </if>
+			<if test="productName != null"> product_name = #{productName}, </if>
+			<if test="productPrice != null"> product_price = #{productPrice}, </if>
+			<if test="startDate != null"> start_date = #{startDate}, </if>
+			<if test="endDate != null"> end_date = #{endDate}, </if>
+			<if test="discountRate != null"> discount_rate = #{discountRate}, </if>
+			<if test="productStock != null"> product_stock = #{productStock}, </if>
+			<if test="productOptionId != null"> product_option_id =
+		#{productOptionId}, </if>
+			<if test="productContent != null"> product_content =
+		#{productContent}, </if>
+			<if test="brand != null"> brand = #{brand}, </if>
+			<if test="manufacturer != null"> manufacturer = #{manufacturer}, </if>
+			<if test="productOrigin != null"> product_origin = #{productOrigin}, </if>
+			<if test="productStatus != null"> product_status = #{productStatus}, </if>
+			<if test="deliveryMethod != null"> delivery_method =
+		#{deliveryMethod}, </if>
+			<if test="deliveryCompany != null"> delivery_company =
+		#{deliveryCompany}, </if>
+			<if test="deliveryPrice != null"> delivery_price = #{deliveryPrice}, </if>
+			<if test="address != null"> address = #{address}, </if>
+			<if test="approvalDate != null"> approval_date = #{approvalDate}, </if>
+			<if test="approvalId != null"> approval_id = #{approvalId}, </if>
+			<if test="comments != null"> comments = #{comments}, </if>
+		</set>
+		WHERE product_id = #{productId} </update>
+
+	<!-- 페이징 처리 쿼리 -->
+	<select id="selectProducts" resultType="com.vivido.domain.ProductVO"> SELECT
+		* FROM products LIMIT #{pageSize} OFFSET #{offset}; <!-- OFFSET과 LIMIT을
+		사용하여 페이징 처리 -->
+	</select>
+
+	<!-- 상품 총 개수 조회 -->
+	<select id="getTotalProductCount" resultType="int">
+		SELECT COUNT(*) FROM products
+	</select>
+	<!-- 카테고리별 상품 검색 -->
+	<select id="searchProducts" resultType="com.vivido.domain.ProductVO"> 
+  SELECT * 
+    FROM products
+    WHERE 1=1
+    <if test="productName != null and productName != ''">
+        AND product_name LIKE CONCAT('%', #{productName}, '%')
+    </if>
+    <if test="productId != null and productId != ''">
+        AND product_id = #{productId}
+    </if>
+    <if test="productKeyword != null and productKeyword != ''">
+        AND product_keyword LIKE CONCAT('%', #{productKeyword}, '%')
+    </if>
+    <if test="createDate != null">
+        AND create_date = #{createDate}
+    </if>
+	</select>
+	
+	
+  <!-- 카테고리에 맞는조회 -->
+    <select id="getSubcategoriesByCategory" resultType="com.vivido.domain.ProductVO">
+      SELECT * FROM products WHERE product_category = #{productCategory}
     </select>
 
-    <!-- 상품 수정 -->
-    <update id="updateProduct" parameterType="com.vivido.domain.ProductVO">
-	    UPDATE products
-	    <set>
-	        <if test="productCategory != null"> product_category = #{productCategory}, </if>
-	        <if test="productCategoryDetails != null"> product_category_details = #{productCategoryDetails}, </if>
-	        <if test="productKeyword != null"> product_keyword = #{productKeyword}, </if>
-	        <if test="productName != null"> product_name = #{productName}, </if>
-	        <if test="productPrice != null"> product_price = #{productPrice}, </if>
-	        <if test="startDate != null"> start_date = #{startDate}, </if>
-	        <if test="endDate != null"> end_date = #{endDate}, </if>
-	        <if test="discountRate != null"> discount_rate = #{discountRate}, </if>
-	        <if test="productStock != null"> product_stock = #{productStock}, </if>
-	        <if test="productOptionId != null"> product_option_id = #{productOptionId}, </if>
-	        <if test="productContent != null"> product_content = #{productContent}, </if>
-	        <if test="brand != null"> brand = #{brand}, </if>
-	        <if test="manufacturer != null"> manufacturer = #{manufacturer}, </if>
-	        <if test="productOrigin != null"> product_origin = #{productOrigin}, </if>
-	        <if test="productStatus != null"> product_status = #{productStatus}, </if>
-	        <if test="deliveryMethod != null"> delivery_method = #{deliveryMethod}, </if>
-	        <if test="deliveryCompany != null"> delivery_company = #{deliveryCompany}, </if>
-	        <if test="deliveryPrice != null"> delivery_price = #{deliveryPrice}, </if>
-	        <if test="address != null"> address = #{address}, </if>
-	        <if test="approvalDate != null"> approval_date = #{approvalDate}, </if>
-	        <if test="approvalId != null"> approval_id = #{approvalId}, </if>
-	        <if test="comments != null"> comments = #{comments}, </if>
-	    </set>
-	    WHERE product_id = #{productId}
-    </update>
-    
-		    <!-- 페이징 처리 쿼리 -->
-		<select id="selectProducts" resultType="com.vivido.domain.ProductVO">
-			  SELECT * FROM products
-			    LIMIT #{pageSize} OFFSET #{offset}; <!-- OFFSET과 LIMIT을 사용하여 페이징 처리 -->
-		</select>
-		
-		    <!-- 상품 총 개수 조회 -->
-    <select id="getTotalProductCount" resultType="int">
-        SELECT COUNT(*) FROM products
+    <!-- 카테고리와 세분류에 맞는 상품 목록 조회 -->
+    <select id="getProductsByCategoryAndSubcategory" resultType="com.vivido.domain.ProductVO">
+        SELECT *
+        FROM products
+        WHERE product_category = #{productCategory}
+        AND product_category_details = #{productCategoryDetails}
+        ORDER BY create_date DESC;
     </select>
-    
     
 	
 
