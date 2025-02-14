@@ -22,5 +22,11 @@ public class ProductController {
 	    System.out.println("Management page method is called");
 	    return "product/management";
 	}
+	
+	@GetMapping("/registration")
+	public String registrationPage() {
+	    System.out.println("registration page method is called");
+	    return "product/registration";
+	}
 
 }

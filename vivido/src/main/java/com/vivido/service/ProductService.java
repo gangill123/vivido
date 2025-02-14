@@ -25,5 +25,12 @@ public interface ProductService {
 	public List<String> getSubcategoriesByCategory(String productCategory);
 
 	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
-
+	
+	Map<String, Integer> getRentalCounts();
+	
+	////////////////////////////상품 등록 페이지 시작////////////////////////////////
+	public void registerProduct(ProductVO productVO);
+	
+	///////////////////////////////상품 등록 페이지 끝////////////////////////////////
+	
 }

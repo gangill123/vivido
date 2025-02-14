@@ -1,6 +1,7 @@
 package com.vivido.repository;
 
 import java.util.List;
+import java.util.Map;
 
 import com.vivido.domain.ProductVO;
 
@@ -17,15 +18,17 @@ public interface ProductDAO {
 	public int updateProduct(ProductVO product);
 
 	public List<ProductVO> selectProducts(int offset, int pageSize);
-	
+
 	public int getTotalProductCount();
-	
-	List<ProductVO> searchProducts(ProductVO productVO);
+
+	public List<ProductVO> searchProducts(ProductVO productVO);
 
 	public List<String> getSubcategoriesByCategory(String productCategory);
 
 	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
-	
-	
+
+	public Map<String, Integer> getRentalCounts();
+
+	public void insertProduct(ProductVO productVO);
 
 }

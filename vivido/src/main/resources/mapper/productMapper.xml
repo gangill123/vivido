@@ -2,6 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.vivido.mapper.productMapper">
+	
+	
+	
+	<resultMap id="rentalCountMap" type="map">
+	    <result column="rentedCount" property="rentedCount" javaType="int"/>
+	    <result column="availableCount" property="availableCount" javaType="int"/>
+	    <result column="totalCount" property="totalCount" javaType="int"/>
+	</resultMap>
+
+
+
 	<!-- 전체 상품 조회 -->
 	<select id="getAllProducts" resultType="com.vivido.domain.ProductVO">
 		SELECT * FROM products
@@ -82,7 +93,6 @@
     </if>
 	</select>
 	
-	
   <!-- 카테고리에 맞는조회 -->
     <select id="getSubcategoriesByCategory" resultType="com.vivido.domain.ProductVO">
       SELECT * FROM products WHERE product_category = #{productCategory}
@@ -96,6 +106,31 @@
         AND product_category_details = #{productCategoryDetails}
         ORDER BY create_date DESC;
     </select>
+	 
+	<select id="getRentalCounts" resultMap="rentalCountMap">
+	   SELECT 
+	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE start_date &lt;= NOW()) AS rentedCount,
+	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE start_date > NOW()) AS availableCount,
+	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products) AS totalCount
+	   FROM DUAL
+	</select>
+	
+	<!--상품 등록 insert-->
+	<insert id="insertProduct" parameterType="com.vivido.domain.ProductVO">
+        INSERT INTO products (product_id, product_seller_id, product_category, product_category_details, 
+                              product_keyword, product_name, product_price, start_date, end_date, 
+                              discount_rate, product_stock, product_option_id, product_content, brand, 
+                              manufacturer, product_origin, product_status, delivery_method, 
+                              delivery_company, delivery_price, address, create_date, update_date, 
+                              approval_date, approval_id, comments)
+        VALUES (#{productId}, #{productSellerId}, #{productCategory}, #{productCategoryDetails}, 
+                #{productKeyword}, #{productName}, #{productPrice}, #{startDate}, #{endDate}, 
+                #{discountRate}, #{productStock}, #{productOptionId}, #{productContent}, #{brand}, 
+                #{manufacturer}, #{productOrigin}, #{productStatus}, #{deliveryMethod}, 
+                #{deliveryCompany}, #{deliveryPrice}, #{address}, #{createDate}, #{updateDate}, 
+                #{approvalDate}, #{approvalId}, #{comments})
+    </insert>
+	
     
 	
 

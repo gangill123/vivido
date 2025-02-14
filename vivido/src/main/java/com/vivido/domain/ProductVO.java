@@ -1,6 +1,11 @@
 package com.vivido.domain; 
 
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
@@ -35,8 +40,10 @@ public class ProductVO {
     private String deliveryCompany;  // 택배사
     private int deliveryPrice;  // 배송비
     private String address;  // 출고지
-    private Timestamp createDate;  // 등록일자
-    private Timestamp updateDate;  // 수정일자
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate createDate; //등록일자
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate updateDate;  // 수정일자
     private Timestamp approvalDate;  // 승인일자
     private String approvalId;  // 승인자 ID
     private String comments;  // 비고
@@ -48,5 +55,7 @@ public class ProductVO {
         this.productCategory = productCategory;
         this.productCategoryDetails = productCategoryDetails;
     }
+    
+    
     
 }
