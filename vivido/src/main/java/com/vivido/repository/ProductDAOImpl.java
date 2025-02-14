@@ -2,10 +2,14 @@ package com.vivido.repository;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.vivido.domain.ProductVO;
 
@@ -56,22 +60,40 @@ public class ProductDAOImpl implements ProductDAO {
 	public int getTotalProductCount() {
 		return sqlSession.selectOne(NAMESPACE + ".getTotalProductCount");
 	}
+
 	// 상품 카테고리별 검색
 	@Override
 	public List<ProductVO> searchProducts(ProductVO productVO) {
 		return sqlSession.selectList(NAMESPACE + ".searchProducts", productVO);
 	}
-    // 카테고리에 맞는 세분류 목록 조회
-    public List<String> getSubcategoriesByCategory(String productCategory) {
-        return sqlSession.selectList(NAMESPACE + ".getSubcategoriesByCategory", productCategory);
-    }
 
-    // 카테고리와 세분류에 맞는 상품 목록 조회
-    public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails) {
-        return sqlSession.selectList(NAMESPACE + ".getProductsByCategoryAndSubcategory", 
-                                     new ProductVO(productCategory, productCategoryDetails));
-    }
+	// 카테고리에 맞는 세분류 목록 조회
+	@Override
+	public List<String> getSubcategoriesByCategory(String productCategory) {
+		return sqlSession.selectList(NAMESPACE + ".getSubcategoriesByCategory", productCategory);
+	}
+
+	// 카테고리와 세분류에 맞는 상품 목록 조회
+	@Override
+	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails) {
+		return sqlSession.selectList(NAMESPACE + ".getProductsByCategoryAndSubcategory",
+				new ProductVO(productCategory, productCategoryDetails));
+	}
+	
+	@Override
+	public Map<String, Integer> getRentalCounts() {
+		return sqlSession.selectOne(NAMESPACE + ".getRentalCounts");
+	}
+	
+	////////////////////////////상품 등록 페이지 시작////////////////////////////////
+	@Override
+	public void insertProduct(ProductVO productVO) {
+		sqlSession.insert(NAMESPACE + ".insertProduct");
+	}	
+		
 	
 	
+	
+	////////////////////////////상품 등록 페이지 끝////////////////////////////////
 
 }
