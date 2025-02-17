@@ -29,7 +29,7 @@ public interface ProductService {
 	Map<String, Integer> getRentalCounts();
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
-	public void registerProduct(ProductVO productVO);
+	 public void registerProduct(ProductVO productVO, List<ProductVO> productImages);
 	
 	///////////////////////////////상품 등록 페이지 끝////////////////////////////////
 	

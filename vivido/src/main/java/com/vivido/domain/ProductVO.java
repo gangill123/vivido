@@ -3,6 +3,7 @@ package com.vivido.domain;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -48,6 +49,19 @@ public class ProductVO {
     private String approvalId;  // 승인자 ID
     private String comments;  // 비고
     
+	
+    private int imageId;
+    private String imageUrl;
+    private String thumbnailUrl;
+    private boolean isPrimary;
+    private Timestamp createdAt;
+    
+    
+    
+    
+    public void setIsPrimary(boolean isPrimary) {
+        this.isPrimary = isPrimary;
+    }
     
     
     // 카테고리와 세분류를 받을 수 있는 생성자 추가

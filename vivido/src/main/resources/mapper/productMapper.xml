@@ -6,9 +6,9 @@
 	
 	
 	<resultMap id="rentalCountMap" type="map">
-	    <result column="rentedCount" property="rentedCount" javaType="int"/>
-	    <result column="availableCount" property="availableCount" javaType="int"/>
-	    <result column="totalCount" property="totalCount" javaType="int"/>
+		<result column="rentedCount" property="rentedCount" javaType="int" />
+		<result column="availableCount" property="availableCount" javaType="int" />
+		<result column="totalCount" property="totalCount" javaType="int" />
 	</resultMap>
 
 
@@ -115,21 +115,35 @@
 	   FROM DUAL
 	</select>
 	
-	<!--상품 등록 insert-->
+
+
+		 <!-- 상품 등록 -->
 	<insert id="insertProduct" parameterType="com.vivido.domain.ProductVO">
-        INSERT INTO products (product_id, product_seller_id, product_category, product_category_details, 
-                              product_keyword, product_name, product_price, start_date, end_date, 
-                              discount_rate, product_stock, product_option_id, product_content, brand, 
-                              manufacturer, product_origin, product_status, delivery_method, 
-                              delivery_company, delivery_price, address, create_date, update_date, 
-                              approval_date, approval_id, comments)
-        VALUES (#{productId}, #{productSellerId}, #{productCategory}, #{productCategoryDetails}, 
-                #{productKeyword}, #{productName}, #{productPrice}, #{startDate}, #{endDate}, 
-                #{discountRate}, #{productStock}, #{productOptionId}, #{productContent}, #{brand}, 
-                #{manufacturer}, #{productOrigin}, #{productStatus}, #{deliveryMethod}, 
-                #{deliveryCompany}, #{deliveryPrice}, #{address}, #{createDate}, #{updateDate}, 
-                #{approvalDate}, #{approvalId}, #{comments})
-    </insert>
+		INSERT INTO products (
+		product_id, product_category,
+		product_category_details,
+		product_keyword, product_name, product_price, discount_rate,
+		product_stock, product_content, brand,
+		manufacturer, product_origin,
+		create_date, comments
+		) VALUES (
+		#{productId}, #{productCategory},
+		#{productCategoryDetails},
+		#{productKeyword}, #{productName}, #{productPrice}, #{discountRate},
+		#{productStock}, #{productContent},
+		#{brand}, #{manufacturer}, #{productOrigin}, #{createDate}, #{comments}
+		)
+	</insert>
+
+	<!-- 이미지 등록 -->
+		    <insert id="insertProductImage" parameterType="com.vivido.domain.ProductVO">
+		        INSERT INTO product_image (
+		            product_id, image_url, thumbnail_url, is_primary, created_at
+		        ) VALUES (
+		            #{productId}, #{imageUrl}, #{thumbnailUrl}, #{isPrimary}, #{createdAt}
+		        )
+		    </insert>
+		
 	
     
 	
