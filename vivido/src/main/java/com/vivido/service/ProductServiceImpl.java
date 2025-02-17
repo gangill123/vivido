@@ -107,10 +107,16 @@ public class ProductServiceImpl implements ProductService {
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	 // 상품 등록
 	@Override
-	public void registerProduct(ProductVO productVO) {
-		productDAO.insertProduct(productVO);
-	}
-	
+	   public void registerProduct(ProductVO productVO, List<ProductVO> productImages) {
+        // 상품 등록
+        productDAO.insertProduct(productVO);
+
+        // 이미지 등록
+        for (ProductVO productImage : productImages) {
+            productDAO.insertProductImage(productImage);
+        }
+    
+    }
 	
 	
 	

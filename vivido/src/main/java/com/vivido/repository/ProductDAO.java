@@ -29,6 +29,10 @@ public interface ProductDAO {
 
 	public Map<String, Integer> getRentalCounts();
 
-	public void insertProduct(ProductVO productVO);
+    // 상품 등록
+    void insertProduct(ProductVO productVO);
+
+    // 이미지 등록
+    void insertProductImage(ProductVO productImage);
 
 }

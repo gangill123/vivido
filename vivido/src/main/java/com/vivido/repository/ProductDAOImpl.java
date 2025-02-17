@@ -88,8 +88,13 @@ public class ProductDAOImpl implements ProductDAO {
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	@Override
 	public void insertProduct(ProductVO productVO) {
-		sqlSession.insert(NAMESPACE + ".insertProduct");
-	}	
+		sqlSession.insert(NAMESPACE + ".insertProduct", productVO);
+	}
+	@Override
+	public void insertProductImage(ProductVO productImage) {
+		sqlSession.insert(NAMESPACE + ".insertProductImage", productImage);
+		
+	}
 		
 	
 	

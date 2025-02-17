@@ -2,10 +2,12 @@
 <html lang="en">
 
 
+	<html xmlns:th="http://www.thymeleaf.org">
+		<link rel="stylesheet" th:href="@{/css/registration.css}">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 
 <head th:replace="layout/header :: head (VIVIDO)">
-	<link rel="stylesheet" th:href="@{/css/registration.css}">
 </head>
 
 <body id="page-top">
@@ -23,164 +25,389 @@
             <!-- Main Content -->
          <main th:replace="layout/main :: main"></main>
 <!--  컨텐츠 작성란 -->		 
-<div class="card">
-    <div class="card-header">
-        <h1>상품 등록</h1>
-    </div>
-    <form onsubmit="event.preventDefault(); registerProduct();">
-        <div class="form-group">
-            <label for="productId">상품 ID:</label>
-            <input type="text" class="form-control" id="productId" required>
+<div class="container mt-5">
+    <!-- 상품 등록 카드 -->
+    <div class="card shadow-lg rounded">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h4 mb-0">상품 등록</h2>
         </div>
-        <div class="form-group">
-            <label for="productSellerId">판매자 ID:</label>
-            <input type="text" class="form-control" id="productSellerId" required>
-        </div>
-        <div class="form-group">
-            <label for="productCategory">카테고리:</label>
-            <input type="text" class="form-control" id="productCategory" required>
-        </div>
-        <div class="form-group">
-            <label for="productCategoryDetails">카테고리 세분류:</label>
-            <input type="text" class="form-control" id="productCategoryDetails">
-        </div>
-        <div class="form-group">
-            <label for="productKeyword">키워드:</label>
-            <input type="text" class="form-control" id="productKeyword">
-        </div>
-        <div class="form-group">
-            <label for="productName">상품명:</label>
-            <input type="text" class="form-control" id="productName" required>
-        </div>
-        <div class="form-group">
-            <label for="productPrice">가격:</label>
-            <input type="number" class="form-control" id="productPrice" required>
-        </div>
-        <div class="form-group">
-            <label for="discountRate">할인율:</label>
-            <input type="number" class="form-control" id="discountRate">
-        </div>
-        <div class="form-group">
-            <label for="productStock">재고:</label>
-            <input type="number" class="form-control" id="productStock" required>
-        </div>
-        <div class="form-group">
-            <label for="productOptionId">옵션 (true/false):</label>
-            <input type="checkbox" class="form-control" id="productOptionId">
-        </div>
-        <div class="form-group">
-            <label for="productContent">상품 내용:</label>
-            <textarea class="form-control" id="productContent"></textarea>
-        </div>
-        <div class="form-group">
-            <label for="brand">브랜드:</label>
-            <input type="text" class="form-control" id="brand">
-        </div>
-        <div class="form-group">
-            <label for="manufacturer">제조사:</label>
-            <input type="text" class="form-control" id="manufacturer">
-        </div>
-        <div class="form-group">
-            <label for="productOrigin">원산지:</label>
-            <input type="text" class="form-control" id="productOrigin">
-        </div>
-        <div class="form-group">
-            <label for="productStatus">상품 상태:</label>
-            <input type="number" class="form-control" id="productStatus">
-        </div>
-        <div class="form-group">
-            <label for="deliveryMethod">배송 방법:</label>
-            <input type="text" class="form-control" id="deliveryMethod">
-        </div>
-        <div class="form-group">
-            <label for="deliveryCompany">택배사:</label>
-            <input type="text" class="form-control" id="deliveryCompany">
-        </div>
-        <div class="form-group">
-            <label for="deliveryPrice">배송비:</label>
-            <input type="number" class="form-control" id="deliveryPrice">
-        </div>
-        <div class="form-group">
-            <label for="address">출고지:</label>
-            <input type="text" class="form-control" id="address">
-        </div>
-        <div class="form-group">
-            <label for="createDate">등록일자:</label>
-            <input type="date" class="form-control" id="createDate">
-        </div>
-        <div class="form-group">
-            <label for="updateDate">수정일자:</label>
-            <input type="date" class="form-control" id="updateDate">
-        </div>
-        <div class="form-group">
-            <label for="approvalDate">승인일자:</label>
-            <input type="date" class="form-control" id="approvalDate">
-        </div>
-        <div class="form-group">
-            <label for="approvalId">승인자 ID:</label>
-            <input type="text" class="form-control" id="approvalId">
-        </div>
-        <div class="form-group">
-            <label for="comments">비고:</label>
-            <textarea class="form-control" id="comments"></textarea>
-        </div>
+        <div class="card-body">
+            <form onsubmit="event.preventDefault(); registerProduct();">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <!-- 상품 ID -->
+                            <tr>
+                                <th scope="row" class="align-middle">상품 ID</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" id="productId" placeholder="상품 ID 입력" required>
+                                </td>
+                            </tr>
 
-        <button type="submit" class="btn btn-primary">등록</button>
-    </form>
+                            <!-- 카테고리 -->
+                            <tr>
+                                <th scope="row" class="align-middle">카테고리</th>
+                                <td>
+                                    <div class="d-flex">
+                                        <!-- 카테고리 박스 -->
+                                        <select class="form-control form-control-sm mr-3" id="productCategory" onchange="updateSubCategory();">
+                                            <option value="">카테고리 선택</option>
+                                            <option value="electronics">전자제품</option>
+                                            <option value="clothing">의류</option>
+                                            <option value="books">도서</option>
+                                        </select>
+                                        
+                                        <!-- 세분류 박스 -->
+                                        <select class="form-control form-control-sm" id="productCategoryDetails" style="display:none;">
+                                            <option value="">세분류 선택</option>
+                                            <!-- 세분류 항목은 선택된 카테고리에 따라 동적으로 변경됩니다 -->
+                                        </select>
+                                    </div>
+                                </td>
+                            </tr>
+                            <!-- 상품명 -->
+                            <tr>
+                                <th scope="row" class="align-middle">상품명</th>
+                                <td>
+                                    <input type="text" class="form-control form-control-sm" id="productName" placeholder="상품명 입력" required>
+                                </td>
+                            </tr>
+                            <!-- 가격 -->
+                            <tr>
+                                <th scope="row" class="align-middle">가격</th>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" id="productPrice" placeholder="가격 입력" required>
+                                </td>
+                            </tr>
+                            <!-- 할인율 -->
+                            <tr>
+                                <th scope="row" class="align-middle">할인율</th>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" id="discountRate" placeholder="할인율 입력">
+                                </td>
+                            </tr>
+                            <!-- 재고 -->
+                            <tr>
+                                <th scope="row" class="align-middle">재고</th>
+                                <td>
+                                    <input type="number" class="form-control form-control-sm" id="productStock" placeholder="재고 입력" required>
+                                </td>
+                            </tr>
+							<tr>
+							    <th scope="row" class="align-middle">비고 입력</th>
+							    <td>
+							        <input type="text" class="form-control form-control-sm" id="comments" placeholder="상품 내용 입력">
+							    </td>
+							</tr>
+
+                            <!-- 상품 내용 -->
+						
+							
+							      <tr>
+							          <th scope="row" class="align-middle">상품 내용</th>
+							          <td>
+							              <!-- 썸머노트 에디터로 변환될 textarea -->
+							              <textarea class="form-control form-control-sm" id="productContent" rows="4" placeholder="상품 내용을 입력하세요..."></textarea>
+							          </td>
+							      </tr>
+								  
+								  
+							<tr>
+							    <th scope="row" class="align-middle">상품 키워드</th>
+							    <td>
+							        <input type="text" class="form-control form-control-sm" id="productKeyword" placeholder="상품 키워드 입력" required>
+							    </td>
+							</tr>
+							<tr>
+							    <th scope="row" class="align-middle">브랜드</th>
+							    <td>
+							        <input type="text" class="form-control form-control-sm" id="brand" placeholder="상품 브랜드 입력" required>
+							    </td>
+							</tr>
+							<tr>
+							    <th scope="row" class="align-middle">제조사</th>
+							    <td>
+							        <input type="text" class="form-control form-control-sm" id="manufacturer" placeholder="상품 제조사 입력" required>
+							    </td>
+							</tr>
+							
+							<tr>
+							    <th scope="row" class="align-middle">원산지</th>
+							    <td>
+							        <input type="text" class="form-control form-control-sm" id="productOrigin" placeholder="상품 원산지 입력" required>
+							    </td>
+							</tr>
+							
+							<tr>
+							    <th scope="row" class="align-middle">등록일</th>
+							    <td>
+							        <input type="text" class="form-control form-control-sm" id="createDate" readonly>
+							    </td>
+							</tr>
+							
+						<!-- 이미지 업로드 -->
+						<tr>
+						    <th scope="row" class="align-middle">상품 이미지</th>
+						    <td>
+						        <!-- 첨부파일 업로드 -->
+						        <input type="file" class="form-control form-control-sm no-border" id="productImages" multiple onchange="previewImages()">
+						        <div id="imagePreviewContainer" class="mt-3">
+						            <!-- 미리보기 이미지가 여기에 표시됨 -->
+						        </div>
+						    </td>
+						</tr>
+
+						<tr>
+						    <th scope="row" class="align-middle">썸네일 선택</th>
+						    <td>
+						        <select class="form-control form-control-sm" id="thumbnail" onchange="updateThumbnailPreview()">
+						            <option value="">썸네일 선택</option>
+						            <!-- 썸네일 목록은 자바스크립트로 동적으로 채워질 예정 -->
+						        </select>
+						        <div id="thumbnailPreview" class="mt-3">
+						            <!-- 썸네일 미리보기 이미지 -->
+						        </div>
+						    </td>
+						</tr>
+							
+							
+                        </tbody>
+                    </table>
+                </div>
+                <div class="d-flex justify-content-end">
+                    <button type="submit" class="btn btn-lg btn-success">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
-		 
-		 
-  
-  
-  <script>
-         function registerProduct() {
-             const productData = {
-                 productId: document.getElementById("productId").value,
-                 productSellerId: document.getElementById("productSellerId").value,
-                 productCategory: document.getElementById("productCategory").value,
-                 productCategoryDetails: document.getElementById("productCategoryDetails").value,
-                 productKeyword: document.getElementById("productKeyword").value,
-                 productName: document.getElementById("productName").value,
-                 productPrice: document.getElementById("productPrice").value,
-                 discountRate: document.getElementById("discountRate").value,
-                 productStock: document.getElementById("productStock").value,
-                 productOptionId: document.getElementById("productOptionId").checked,
-                 productContent: document.getElementById("productContent").value,
-                 brand: document.getElementById("brand").value,
-                 manufacturer: document.getElementById("manufacturer").value,
-                 productOrigin: document.getElementById("productOrigin").value,
-                 productStatus: document.getElementById("productStatus").value,
-                 deliveryMethod: document.getElementById("deliveryMethod").value,
-                 deliveryCompany: document.getElementById("deliveryCompany").value,
-                 deliveryPrice: document.getElementById("deliveryPrice").value,
-                 address: document.getElementById("address").value,
-                 createDate: document.getElementById("createDate").value,
-                 updateDate: document.getElementById("updateDate").value,
-                 approvalDate: document.getElementById("approvalDate").value,
-                 approvalId: document.getElementById("approvalId").value,
-                 comments: document.getElementById("comments").value
-             };
+<script>
+	$(function() {
+	    $('#productContent').summernote({
+	        height: 200,
+	        placeholder: '상품 내용을 입력하세요...',
+	        lang: 'ko-KR',
+	        toolbar: [
+	            ['style', ['bold', 'italic', 'underline', 'clear']],
+	            ['font', ['strikethrough', 'superscript', 'subscript']],
+	            ['fontname', ['fontname']],
+	            ['para', ['ul', 'ol', 'paragraph']],
+	            ['table', ['table']],
+	            ['insert', ['link', 'picture', 'video']],
+	            ['view', ['fullscreen', 'codeview', 'help']]
+	        ],
+	        disableDragAndDrop: true,
+	        focus: true,
+	        callbacks: {
+	            onImageUpload: function(files) {
+	                for (let i = 0; i < files.length; i++) {
+	                    let reader = new FileReader();
+	                    reader.onload = function(e) {
+	                        $('#productContent').summernote('insertImage', e.target.result);
+	                    };
+	                    reader.readAsDataURL(files[i]);
+	                }
+	            }
+	        },
+	        minHeight: 150,
+	        maxHeight: 500,
+	        popover: {
+	            image: ['resizeFull', 'resizeHalf', 'resizeQuarter', 'floatLeft', 'floatRight', 'imageProperties'],
+	            link: ['linkDialogShow', 'unlink'],
+	            air: ['style']
+	        }
+	    });
+	});
+  </script>
 
-             // RESTful API 호출
-             fetch('/management/products/register', {
-                 method: 'POST',
-                 headers: {
-                     'Content-Type': 'application/json',
-                 },
-                 body: JSON.stringify(productData)
-             })
-             .then(response => response.json())
-             .then(data => {
-                 console.log('상품 등록 성공:', data);
-                 alert('상품이 등록되었습니다.');
-             })
-             .catch(error => {
-                 console.error('상품 등록 실패:', error);
-                 alert('상품 등록에 실패했습니다.');
-             });
-         }
-     </script>
+
+<script>
+	function previewImages() {
+	    const files = document.getElementById('productImages').files;
+	    const previewContainer = document.getElementById('imagePreviewContainer');
+	    const thumbnailSelect = document.getElementById('thumbnail');
+	    const thumbnailPreview = document.getElementById('thumbnailPreview');
+	    
+	    // 미리보기 컨테이너 초기화
+	    previewContainer.innerHTML = '';
+	    thumbnailSelect.innerHTML = '<option value="">썸네일 선택</option>'; // 썸네일 선택 목록 초기화
+	    thumbnailPreview.innerHTML = ''; // 썸네일 미리보기 초기화
+
+	    if (files.length === 0) {
+	        return;
+	    }
+
+	    // 선택된 이미지 파일들을 하나씩 미리보기
+	    for (let i = 0; i < files.length; i++) {
+	        const file = files[i];
+	        
+	        // 이미지 파일인지 확인
+	        if (file && file.type.startsWith('image/')) {
+	            const reader = new FileReader();
+	            
+	            reader.onload = function(event) {
+	                // 미리보기 이미지 생성
+	                const imgElement = document.createElement('img');
+	                imgElement.src = event.target.result;
+	                imgElement.classList.add('img-fluid', 'preview-image');
+	                imgElement.style.maxWidth = '150px'; // 크기 제한 (필요시 조정)
+	                imgElement.style.margin = '5px';
+	                
+	                previewContainer.appendChild(imgElement);
+	                
+	                // 썸네일 선택 목록 추가
+	                const option = document.createElement('option');
+	                option.value = event.target.result; // 이미지의 Data URL을 값으로 설정
+	                option.textContent = `Image ${i + 1}`;
+	                thumbnailSelect.appendChild(option);
+	            };
+	            
+	            // 파일을 읽어서 이미지를 미리보기
+	            reader.readAsDataURL(file);
+	        }
+	    }
+	}
+
+	// 썸네일 선택 시 미리보기 업데이트
+	function updateThumbnailPreview() {
+	    const thumbnailSelect = document.getElementById('thumbnail');
+	    const thumbnailPreview = document.getElementById('thumbnailPreview');
+	    const selectedThumbnail = thumbnailSelect.value;
+
+	    // 썸네일 미리보기 초기화
+	    thumbnailPreview.innerHTML = '';
+
+	    if (selectedThumbnail) {
+	        const imgElement = document.createElement('img');
+	        imgElement.src = selectedThumbnail;
+	        imgElement.classList.add('img-fluid');
+	        imgElement.style.maxWidth = '150px'; // 썸네일 미리보기 크기
+	        imgElement.style.margin = '5px';
+	        
+	        thumbnailPreview.appendChild(imgElement);
+	    }
+	}
+	   
+	
+</script>
+
+
+
+<script>
+    // 카테고리에 따라 세분류 옵션을 업데이트하는 함수
+    function updateSubCategory() {
+        var category = document.getElementById("productCategory").value;
+        var subCategorySelect = document.getElementById("productCategoryDetails");
+        var subCategories = {
+            electronics: ["휴대폰", "컴퓨터", "카메라"],
+            clothing: ["상의", "하의", "아우터"],
+            books: ["소설", "에세이", "자기계발"]
+        };
+
+        // 세분류 박스를 초기화
+        subCategorySelect.innerHTML = '<option value="">세분류 선택</option>';
+
+        if (category) {
+            // 선택된 카테고리에 따라 세분류 항목을 추가
+            subCategories[category].forEach(function(subCategory) {
+                var option = document.createElement("option");
+                option.value = subCategory.toLowerCase();
+                option.text = subCategory;
+                subCategorySelect.appendChild(option);
+            });
+            subCategorySelect.style.display = "block"; // 세분류 박스 보이기
+        } else {
+            subCategorySelect.style.display = "none"; // 카테고리가 선택되지 않으면 세분류 박스 숨기기
+        }
+    }
+</script>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function() {
+	    const today = new Date();
+	    const year = today.getFullYear();
+	    const month = String(today.getMonth() + 1).padStart(2, '0');
+	    const day = String(today.getDate()).padStart(2, '0');
+	    const formattedDate = `${year}-${month}-${day}`;
+	    
+	    document.getElementById('createDate').value = formattedDate;
+	});
+	
+</script>
+  
+  
+<script>
+	function registerProduct() {
+	    const formData = new FormData();
+	    
+	    // 일반 상품 데이터
+	    formData.append('productId', document.getElementById('productId').value);
+	    formData.append('productCategory', document.getElementById('productCategory').value);
+	    formData.append('productCategoryDetails', document.getElementById('productCategoryDetails').value);
+	    formData.append('productKeyword', document.getElementById('productKeyword').value);
+	    formData.append('productName', document.getElementById('productName').value);
+	    formData.append('productPrice', document.getElementById('productPrice').value);
+
+	    formData.append('discountRate', document.getElementById('discountRate').value);
+	    formData.append('productStock', document.getElementById('productStock').value);
+
+		// 썸머노트에서 값 가져오기
+		formData.append('productContent', $('#productContent').summernote('code'));  // 변경된 부분
+		
+	    formData.append('brand', document.getElementById('brand').value);
+	    formData.append('manufacturer', document.getElementById('manufacturer').value);
+	    formData.append('productOrigin', document.getElementById('productOrigin').value);
+	    formData.append('createDate', document.getElementById('createDate').value);
+	    formData.append('comments', document.getElementById('comments').value);
+
+	    // 이미지 파일 (다중 이미지)
+		const productImages = document.getElementById('productImages').files;
+		if (productImages.length > 0) {
+		    for (let i = 0; i < productImages.length; i++) {
+		        formData.append('productImages', productImages[i]);
+		    }
+		} else {
+		    console.error('이미지가 선택되지 않았습니다.');
+		}
+
+	    // 썸네일 선택
+	    const thumbnailSelect = document.getElementById('thumbnail');
+	    const selectedThumbnail = thumbnailSelect.value;
+	    formData.append('thumbnail', selectedThumbnail);
+
+	    // RESTful API 호출
+	    fetch('/management/products/register', {
+	        method: 'POST',
+	        body: formData,  // FormData를 직접 전송
+	    })
+	    .then(response => response.json())
+	    .then(data => {
+	        console.log('상품 등록 성공:', data);
+	        alert('상품이 등록되었습니다.');
+	    })
+	    .catch(error => {
+	        console.error('상품 등록 실패:', error);
+	        alert('상품 등록에 실패했습니다.');
+	    });
+	}
+
+	// 이미지 파일 선택 후 썸네일 목록 동적으로 추가
+	document.getElementById('productImages').addEventListener('change', function() {
+	    const thumbnailSelect = document.getElementById('thumbnail');
+	    thumbnailSelect.innerHTML = '<option value="">썸네일 선택</option>'; // 초기화
+	    
+	    const files = this.files;
+	    for (let i = 0; i < files.length; i++) {
+	        const option = document.createElement('option');
+	        option.value = files[i].name; // 파일 이름을 썸네일 값으로 사용
+	        option.textContent = files[i].name; // 파일 이름을 옵션 텍스트로 사용
+	        thumbnailSelect.appendChild(option);
+	    }
+	});
+
+
+</script>
 	
 		 
 		 
@@ -236,8 +463,21 @@
     </div>
 
     <!-- Bootstrap core JavaScript-->
+	
 
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+
+<!-- 부트스트랩 CSS (필요한 경우 추가) -->
+   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+   <!-- 썸머노트 CSS -->
+   <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.css" rel="stylesheet">
+
+   <!-- jQuery (썸머노트에 필요) -->
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+   <!-- 썸머노트 JS -->
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js"></script>
+
 	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 	
