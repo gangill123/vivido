@@ -114,10 +114,9 @@
 	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products) AS totalCount
 	   FROM DUAL
 	</select>
-	
 
 
-		 <!-- 상품 등록 -->
+	<!-- 상품 등록 -->
 	<insert id="insertProduct" parameterType="com.vivido.domain.ProductVO">
 		INSERT INTO products (
 		product_id, product_category,
@@ -136,13 +135,13 @@
 	</insert>
 
 	<!-- 이미지 등록 -->
-		    <insert id="insertProductImage" parameterType="com.vivido.domain.ProductVO">
-		        INSERT INTO product_image (
-		            product_id, image_url, thumbnail_url, is_primary, created_at
-		        ) VALUES (
-		            #{productId}, #{imageUrl}, #{thumbnailUrl}, #{isPrimary}, #{createdAt}
-		        )
-		    </insert>
+	<insert id="insertProductImage" parameterType="com.vivido.domain.ProductVO">
+		INSERT INTO product_image (
+		product_id, image_url, thumbnail_url, is_primary, created_at
+		) VALUES (
+		#{productId}, #{imageUrl}, #{thumbnailUrl}, #{isPrimary}, #{createdAt}
+		)
+	</insert>
 		
 	
     

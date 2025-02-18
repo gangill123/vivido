@@ -5,6 +5,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -267,7 +271,52 @@ public class ProductRestController {
 	    // 썸네일 URL 반환
 	    return "/uploads/thumbnails/" + thumbnailFileName; // 웹에서 접근할 수 있는 경로
 	}
+	
 
+    // 썸머노트 이미지 url 반환 api
+	  @PostMapping("/uploadImage")
+	    public Map<String, String> uploadImage(@RequestParam("file") MultipartFile file) {
+	        Map<String, String> response = new HashMap<>();
+
+	        if (!file.isEmpty()) {
+	            try {
+	                // 업로드할 디렉토리
+	                String uploadDir = "C:/uploads/";
+
+	                // 원본 파일명 가져오기
+	                String originalFileName = file.getOriginalFilename();
+	                
+	                // 파일명 중복 방지를 위해 UUID 사용
+	                String savedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
+	                
+	                // 파일명 URL 인코딩 처리 (특수문자, 한글 인코딩)
+	                String encodedFileName = URLEncoder.encode(savedFileName, "UTF-8").replaceAll("\\+", "%20");
+
+	                // 저장 경로 설정
+	                Path savePath = Paths.get(uploadDir + encodedFileName);
+
+	                // 디렉토리가 없으면 생성
+	                File directory = new File(uploadDir);
+	                if (!directory.exists()) {
+	                    directory.mkdirs();
+	                }
+
+	                // 파일 저장
+	                file.transferTo(savePath.toFile());
+
+	                // 이미지 URL 반환 (웹에서 접근 가능한 경로)
+	                response.put("fileUrl", "/uploads/" + encodedFileName);
+	            } catch (IOException e) {
+	                e.printStackTrace();
+	                response.put("fileUrl", "");
+	            }
+	        } else {
+	            response.put("fileUrl", "");
+	        }
+
+	        return response;
+	    }
+	
 
 
 	//////////////////////////// 상품 등록 페이지 끝////////////////////////////////

@@ -1,0 +1,230 @@
+/* 테이블 셀 내에서 텍스트가 줄바꿈되지 않도록 설정 */
+	.table th, .table td {
+	    white-space: nowrap; /* 줄바꿈 방지 */
+	    text-align: center;   /* 텍스트를 가운데 정렬 */
+		color: black; /* 텍스트 색상을 검은색으로 설정 */
+		
+	}
+	
+	/* 테이블 헤더 스타일 */
+	 .table th {
+	     background-color: #f4f6f9;
+	     color: #5a5a5a;
+	     text-align: center;
+	     font-weight: bold;
+	     font-size: 14px;
+	 }
+
+	 /* 테이블 본문 스타일 */
+	 .table td {
+	     text-align: center;
+	     vertical-align: middle;
+	     background-color: #ffffff;
+	     font-size: 13px;
+	 }
+
+	 /* 마우스 오버시 배경색 변경 */
+	 .table-hover tbody tr:hover {
+	     background-color: #f1f1f1;
+	 }
+
+	 /* 경계선 스타일 */
+	 .table-bordered {
+	     border: 1px solid #ddd;
+	 }
+
+	 .table-bordered th, .table-bordered td {
+	     border: 1px solid #ddd;
+	 }
+
+	 /* 더 작은 테이블 스타일 */
+	 .table-sm th, .table-sm td {
+	     padding: 0.75rem;
+	 }
+
+	 /* 카드 스타일 */
+	 .card {
+	     border-radius: 12px;
+	     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+	 }
+
+	 .card-header {
+	     background-color: #ffffff;
+	     border-bottom: 2px solid #ddd;
+	     padding: 20px 30px;
+	     color: #333;
+	     font-weight: bold;
+	     font-size: 18px;
+	 }
+
+	 /* 반응형 테이블 디자인 */
+	 .table-responsive {
+	     overflow-x: auto;
+	 }
+	
+	
+	
+	 /* 모달 기본 스타일 */
+	 /* 모달 기본 스타일 */
+	 /* 모달 기본 스타일 */
+	 /* 모달 기본 스타일 */
+	 .modal {
+	     display: none; /* 기본적으로 숨김 */
+	     position: fixed;
+	     z-index: 1; /* 화면 위에 고정 */
+	     left: 0;
+	     top: 0;
+	     width: 35%; /* 모달의 너비를 절반으로 줄임 (70%에서 35%로) */
+	     height: 50%; /* 모달 높이를 절반으로 줄임 */
+	     background-color: rgba(0,0,0,0.4); /* 배경 반투명 */
+	     overflow: auto;
+	     padding-top: 60px;
+	 }
+
+	 /* 모달 내용 */
+	 .modal-content {
+	     background-color: #fff;
+	     margin: 2% auto; /* 모달 내용 여백을 2%로 설정 */
+	     padding: 15px; /* 모달 내부 여백을 15px로 줄임 */
+	     border: 1px solid #888;
+	     width: 90%; /* 모달 내용 너비를 90%로 설정하여, 모달 안의 내용이 꽉 차게 */
+	     border-radius: 10px;
+	     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+	 }
+
+
+	 /* 닫기 버튼 */
+	 .close {
+	     color: #aaa;
+	     font-size: 28px;
+	     font-weight: bold;
+	     position: absolute;
+	     top: 10px;
+	     right: 25px;
+	     cursor: pointer;
+	 }
+
+	 /* 닫기 버튼 hover */
+	 .close:hover,
+	 .close:focus {
+	     color: black;
+	     text-decoration: none;
+	     cursor: pointer;
+	 }
+
+	 /* 제목 스타일 */
+	 h2 {
+	     font-size: 18px;
+	     font-weight: bold;
+	     margin-bottom: 20px;
+	 }
+
+	 /* 폼 요소 스타일 */
+	 label {
+	     font-size: 14px;
+	     margin: 10px 0;
+	     display: block;
+	 }
+
+	 /* 입력 필드 스타일 */
+	 input[type="text"],
+	 input[type="number"],
+	 textarea {
+	     width: 100%;
+	     padding: 8px;
+	     margin: 5px 0 15px 0;
+	     border: 1px solid #ccc;
+	     border-radius: 5px;
+	     font-size: 14px;
+	 }
+
+	 /* 텍스트 영역 크기 */
+	 textarea {
+	     height: 100px;
+	 }
+
+	 /* 버튼 스타일 */
+	 button {
+	     padding: 10px 20px;
+	     background-color: #007bff;
+	     color: white;
+	     border: none;
+	     border-radius: 5px;
+	     font-size: 14px;
+	     cursor: pointer;
+	     margin-right: 10px;
+	 }
+
+	 /* 버튼 hover */
+	 button:hover {
+	     background-color: #0056b3;
+	 }
+	/* 페이지네이션 컨테이너 */
+	   .pagination-container {
+	       display: flex;
+	       justify-content: center;
+	       align-items: center;
+	       gap: 10px;
+	       margin-top: 20px;
+	       font-family: 'Arial', sans-serif;
+	   }
+
+	   /* 페이지네이션 버튼 스타일 */
+	   .pagination-button {
+	       background-color: #ffffff;
+	       border: 1px solid #ddd;
+	       color: #007bff;
+	       padding: 8px 12px;
+	       cursor: pointer;
+	       border-radius: 4px;
+	       transition: background-color 0.3s;
+	   }
+
+	   .pagination-button:disabled {
+	       color: #ccc;
+	       cursor: not-allowed;
+	   }
+
+	   .pagination-button:hover:not(:disabled) {
+	       background-color: #f1f1f1;
+	   }
+
+	   /* 페이지 번호 버튼 */
+	   .pagination-page {
+	       background-color: #ffffff;
+	       border: 1px solid #ddd;
+	       color: #007bff;
+	       padding: 6px 10px;
+	       margin: 0 2px;
+	       cursor: pointer;
+	       border-radius: 4px;
+	       transition: background-color 0.3s;
+	   }
+
+	   .pagination-page:hover {
+	       background-color: #f1f1f1;
+	   }
+
+	   /* 활성화된 페이지 */
+	   .pagination-page.active {
+	       background-color: #007bff;
+	       color: #ffffff;
+	       border: 1px solid #007bff;
+	   }
+
+	   /* 반응형 디자인 */
+	   @media (max-width: 480px) {
+	       .pagination-container {
+	           flex-wrap: wrap;
+	       }
+
+	       .pagination-button,
+	       .pagination-page {
+	           padding: 6px 8px;
+	           font-size: 14px;
+	       }
+	   }
+
+
+
+		
