@@ -189,18 +189,21 @@ public class ProductRestController {
 		if (productImages != null) {
 		    for (MultipartFile imageFile : productImages) {
 		        try {
-		            // 이미지 파일 저장
-		            String imageUrl = saveImage(imageFile); 
+		            // 이미지 파일 저장 (경로 없이 파일명만 반환)
+		            String imageFileName = saveImage(imageFile);
 
-		            // 저장된 이미지 파일을 기반으로 썸네일 생성
-		            File originalImageFile = new File(imageUrl); // 저장된 이미지 파일
-		            String thumbnailUrl = createThumbnail(originalImageFile); // 썸네일 생성
+		            // 원본 이미지 파일 객체 생성 (저장된 디렉터리 경로를 추가)
+		            // C:/uploads/ -> src/main/resources/static/uploads/
+		            File originalImageFile = new File("src/main/resources/static/uploads/" + imageFileName);
+
+		            // 썸네일 생성 (파일명만 반환)
+		            String thumbnailFileName = createThumbnail(originalImageFile);
 
 		            // ProductVO에 이미지 정보 설정
 		            ProductVO productImageVO = new ProductVO();
 		            productImageVO.setProductId(productId);
-		            productImageVO.setImageUrl(imageUrl); // 원본 이미지 URL
-		            productImageVO.setThumbnailUrl(thumbnailUrl); // 썸네일 이미지 URL
+		            productImageVO.setImageUrl("/uploads/" + imageFileName); // 상대 URL로 반환 (웹에서 접근 가능)
+		            productImageVO.setThumbnailUrl("/uploads/thumbnails/" + thumbnailFileName); // 상대 URL로 썸네일 경로 설정
 		            productImageVO.setIsPrimary(false); // 기본 이미지는 false로 설정 (필요에 따라 true로 변경)
 		            productImageVO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
 		            productImageList.add(productImageVO);
@@ -227,7 +230,7 @@ public class ProductRestController {
 
 	private String saveImage(MultipartFile file) throws IOException {
 	    // 실제 업로드할 디렉터리 경로 (운영 환경에서 접근 가능한 경로)
-	    String directory = "C:/uploads/"; // 실제 파일 저장 경로 (서버의 디스크 위치로 수정)
+	    String directory = "src/main/resources/static/uploads/"; // 상대 경로로 변경
 	    
 	    // 파일 이름을 UUID로 변경하여 중복 방지
 	    String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
@@ -240,15 +243,22 @@ public class ProductRestController {
 
 	    // 파일을 해당 경로에 저장
 	    File dest = new File(uploadDir, fileName);
+	    
+	    if (!dest.exists()) {
+	        dest.createNewFile(); // 파일이 없으면 새로운 파일 생성
+	    }
+	    
 	    file.transferTo(dest); // IOException 발생 가능
 
 	    // 저장된 이미지 URL 반환 (웹에서 접근할 수 있도록)
-	    return "/uploads/" + fileName; // 저장된 경로를 URL로 반환
+	    return "/uploads/" + fileName;
+
 	}
 
 	private String createThumbnail(File originalImageFile) throws IOException {
-	    // 썸네일을 저장할 디렉터리
-	    String thumbnailDir = "C:/uploads/thumbnails/"; // 썸네일을 서버 디스크의 'uploads/thumbnails' 폴더에 저장
+	    // 프로젝트의 상대 경로로 설정 (예: static/thumbnails 디렉토리)
+	    String thumbnailDir = "src/main/resources/static/uploads/thumbnails/";  // 상대 경로
+
 	    File thumbnailDirectory = new File(thumbnailDir);
 	    if (!thumbnailDirectory.exists()) {
 	        thumbnailDirectory.mkdirs(); // 디렉터리가 없다면 생성
@@ -272,51 +282,37 @@ public class ProductRestController {
 	    return "/uploads/thumbnails/" + thumbnailFileName; // 웹에서 접근할 수 있는 경로
 	}
 	
+	   private static final String UPLOAD_DIR = "C:/uploads/summer"; // 업로드 폴더 경로
 
-    // 썸머노트 이미지 url 반환 api
-	  @PostMapping("/uploadImage")
-	    public Map<String, String> uploadImage(@RequestParam("file") MultipartFile file) {
+	 @PostMapping("/uploadImage")
+	    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
 	        Map<String, String> response = new HashMap<>();
 
-	        if (!file.isEmpty()) {
-	            try {
-	                // 업로드할 디렉토리
-	                String uploadDir = "C:/uploads/";
-
-	                // 원본 파일명 가져오기
-	                String originalFileName = file.getOriginalFilename();
-	                
-	                // 파일명 중복 방지를 위해 UUID 사용
-	                String savedFileName = UUID.randomUUID().toString() + "_" + originalFileName;
-	                
-	                // 파일명 URL 인코딩 처리 (특수문자, 한글 인코딩)
-	                String encodedFileName = URLEncoder.encode(savedFileName, "UTF-8").replaceAll("\\+", "%20");
-
-	                // 저장 경로 설정
-	                Path savePath = Paths.get(uploadDir + encodedFileName);
-
-	                // 디렉토리가 없으면 생성
-	                File directory = new File(uploadDir);
-	                if (!directory.exists()) {
-	                    directory.mkdirs();
-	                }
-
-	                // 파일 저장
-	                file.transferTo(savePath.toFile());
-
-	                // 이미지 URL 반환 (웹에서 접근 가능한 경로)
-	                response.put("fileUrl", "/uploads/" + encodedFileName);
-	            } catch (IOException e) {
-	                e.printStackTrace();
-	                response.put("fileUrl", "");
+	        try {
+	            // 업로드 디렉토리 경로
+	            Path uploadPath = Paths.get(UPLOAD_DIR);
+	            
+	            // 디렉토리가 존재하지 않으면 폴더 생성
+	            if (!Files.exists(uploadPath)) {
+	                Files.createDirectories(uploadPath);  // 폴더 생성
 	            }
-	        } else {
-	            response.put("fileUrl", "");
-	        }
 
-	        return response;
+	            // 파일 이름 설정 (UUID 사용 등)
+	            String fileName = UUID.randomUUID().toString() + ".jpg"; 
+	            Path filePath = uploadPath.resolve(fileName);  // 파일 경로 생성
+
+	            // 파일을 업로드 디렉토리에 저장
+	            file.transferTo(filePath);
+
+	            // 업로드된 파일의 URL 반환
+	            response.put("fileUrl", "/uploads/" + fileName);
+
+	            return ResponseEntity.ok(response);
+	        } catch (IOException e) {
+	            response.put("error", "파일 업로드 실패");
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	        }
 	    }
-	
 
 
 	//////////////////////////// 상품 등록 페이지 끝////////////////////////////////

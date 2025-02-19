@@ -31,7 +31,7 @@
 			            <h2 class="h4 mb-0">상품 등록</h2>
 			        </div>
 			        <div class="card-body">
-			            <form onsubmit="event.preventDefault(); registerProduct();">
+			            <form onsubmit="event.preventDefault(); registerProduct();" id="productForm">
 			                <div class="table-responsive">
 			                    <table class="table table-bordered">
 			                        <tbody>
@@ -183,6 +183,19 @@
 
 
 
+			<!-- Summernote CSS -->
+			<link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.css}" rel="stylesheet">
+
+			<!-- Bootstrap 4 JS -->
+
+			<!-- Summernote JS -->
+			<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js}"></script>
+
+			<!-- Summernote 한국어 설정 -->
+			<script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/lang/summernote-ko-KR.min.js}"></script>
+
+			
+			
 <script>
 	var $jq = jQuery.noConflict();
 	$jq(document).ready(function() {
@@ -341,7 +354,7 @@
 	        }
 	    }
 </script>
-	
+	<!-- ㅇㄴㅁ-->
 <script>
 		document.addEventListener('DOMContentLoaded', function() {
 		    const today = new Date();
@@ -371,7 +384,9 @@
 	    formData.append('productStock', document.getElementById('productStock').value);
 
 		// 썸머노트에서 값 가져오기
-		formData.append('productContent', $('#productContent').summernote('code'));  // 변경된 부분
+		formData.append('productContent', $jq('#productContent').summernote('code'));  // 변경된 부분
+		console.log('productContent:', productContent);  // 값 확인
+
 		
 	    formData.append('brand', document.getElementById('brand').value);
 	    formData.append('manufacturer', document.getElementById('manufacturer').value);
@@ -403,6 +418,8 @@
 	    .then(data => {
 	        console.log('상품 등록 성공:', data);
 	        alert('상품이 등록되었습니다.');
+			// 폼 초기화
+			   document.getElementById('productForm').reset();  // productForm은 폼의 id입니다.
 	    })
 	    .catch(error => {
 	        console.error('상품 등록 실패:', error);
@@ -486,22 +503,10 @@
 	  <!-- Bootstrap 4 CSS -->
 	  <link th:href="@{https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css}" rel="stylesheet">
 
-	  <!-- Summernote CSS -->
-	  <link th:href="@{https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.css}" rel="stylesheet">
-
-	  <!-- Bootstrap 4 JS -->
-	  <script th:src="@{https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js}"></script>
-
-	  <!-- Summernote JS -->
-	  <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/summernote-bs4.min.js}"></script>
-
-	  <!-- Summernote 한국어 설정 -->
-	  <script th:src="@{https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.18/lang/summernote-ko-KR.min.js}"></script>
 
 	
 	  <link rel="stylesheet" th:href="@{/css/registration.css}">
 	  		
-	  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 
 
 	

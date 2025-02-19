@@ -40,7 +40,7 @@
 				           <div class="col-md-4">
 				               <div class="card text-center shadow-sm rounded-4" style="background-color: white;">
 				                   <div class="card-body">
-				                       <h5 class="card-title">전체 물품 개수</h5>
+				                       <h5 class="card-title">전체 물품</h5>
 				                       <h2 class="card-text text-primary" id="totalCount">0</h2>
 				                   </div>
 				               </div>
@@ -50,7 +50,7 @@
 				           <div class="col-md-4">
 				               <div class="card text-center shadow-sm rounded-4" style="background-color: white;">
 				                   <div class="card-body">
-				                       <h5 class="card-title">렌탈된 물품 개수</h5>
+				                       <h5 class="card-title">렌탈 중인 물품</h5>
 				                       <h2 class="card-text text-success" id="rentedCount">0</h2>
 				                   </div>
 				               </div>
@@ -60,7 +60,7 @@
 				           <div class="col-md-4">
 				               <div class="card text-center shadow-sm rounded-4" style="background-color: white;">
 				                   <div class="card-body">
-				                       <h5 class="card-title">렌탈 안된 물품 개수</h5>
+				                       <h5 class="card-title">미렌탈 물품</h5>
 				                       <h2 class="card-text text-danger" id="availableCount">0</h2>
 				                   </div>
 				               </div>
@@ -90,11 +90,12 @@
 		                        <option value="keyword">키워드</option>
 		                        <option value="create_date">상품등록일</option>
 		                    </select>
-		                    <label for="search-input" class="me-2 mb-0" style="white-space: nowrap;">* 검색어: </label>
-		                    <input type="text" id="search-input" class="form-control rounded-pill" placeholder="검색어 입력" style="width: 260px;" disabled>
 		                    <label for="date-input" class="me-2 mb-0" style="white-space: nowrap;">* 등록일: </label>
 		                    <input type="date" id="date-input" class="form-control rounded-pill" style="width: 150px;" disabled>
+		                    <label for="search-input" class="me-2 mb-0" style="white-space: nowrap;">* 검색어: </label>
+		                    <input type="text" id="search-input" class="form-control rounded-pill" placeholder="검색어 입력" style="width: 260px;" disabled>
 		                </div>
+
 
 		                <!-- 검색 버튼 -->
 		                <div class="col-md-2 d-flex align-items-center">
@@ -147,6 +148,7 @@
 		            <table class="table table-striped table-bordered table-hover table-sm" id="productTable">
 		                <thead class="thead-light">
 		                    <tr>
+		                        <th class="text-center">상품 이미지</th>
 		                        <th class="text-center">상품ID</th>
 		                        <th class="text-center">상품명</th>
 		                        <th class="text-center">가격</th>
@@ -156,7 +158,6 @@
 		                        <th class="text-center">할인율</th>
 		                        <th class="text-center">재고수량</th>
 		                        <th class="text-center">상품옵션</th>
-		                        <th class="text-center">상품 내용</th>
 		                        <th class="text-center">상품 브랜드</th>
 		                        <th class="text-center">상품 제조사</th>
 		                        <th class="text-center">상품 원산지</th>
@@ -181,7 +182,7 @@
 		        </div>
 		    </div>
 		</div>
-	
+
 	<!-- 상품 수정 모달 -->
 	<div id="editModal" class="modal">
 	    <div class="modal-content">
@@ -190,16 +191,86 @@
 	        <form id="editForm">
 	            <input type="hidden" id="editProductId">
 
-	            <label>상품명: <input type="text" id="editProductName"></label><br>
-	            <label>가격: <input type="number" id="editPrice"></label><br>
-	            <label>카테고리: <input type="text" id="editCategory"></label><br>
-	            <label>카테고리 세분류: <input type="text" id="editCategoryDetails"></label><br>
-	            <label>키워드: <input type="text" id="editKeyword"></label><br>
-	            <label>재고수량: <input type="number" id="editStockQuantity"></label><br>
-	            <label>상품 내용: <textarea id="editProductContent"></textarea></label><br>
+	            <div class="form-group">
+	                <label for="editProductName">상품명:</label>
+	                <input type="text" id="editProductName">
+	            </div>
 
-	            <button type="button" onclick="saveEdit()">저장</button>
-	            <button type="button" onclick="closeModal()">닫기</button>
+	            <div class="form-group">
+	                <label for="editPrice">가격:</label>
+	                <input type="number" id="editPrice">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editCategory">카테고리:</label>
+	                <input type="text" id="editCategory">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editCategoryDetails">카테고리 세분류:</label>
+	                <input type="text" id="editCategoryDetails">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editKeyword">키워드:</label>
+	                <input type="text" id="editKeyword">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editStockQuantity">재고수량:</label>
+	                <input type="number" id="editStockQuantity">
+	            </div>
+
+				
+				<div class="form-group" style="display: flex; align-items: center;">
+				    <label for="editProductStatus" 
+				           style="font-weight: bold; font-size: 16px; color: #333; white-space: nowrap; margin-right: 5px;">
+				        상품 상태:
+				    </label>
+				    <select id="editProductStatus" 
+				            style="padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; background-color: #fff;">
+				        <option value="0">미렌탈</option>
+				        <option value="1">렌탈 중</option>
+				    </select>
+				</div>
+
+
+
+	            <div class="form-group">
+	                <label for="editDeliveryMethod">배송 방법:</label>
+	                <input type="text" id="editDeliveryMethod">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editDeliveryCompany">배송 회사:</label>
+	                <input type="text" id="editDeliveryCompany">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editBrand">상품 브랜드:</label>
+	                <input type="text" id="editBrand">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editManufacturer">제조사:</label>
+	                <input type="text" id="editManufacturer">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editProductOrigin">원산지:</label>
+	                <input type="text" id="editProductOrigin">
+	            </div>
+
+	            <div class="form-group">
+	                <label for="editComments">비고:</label>
+	                <textarea id="editComments"></textarea>
+	            </div>
+
+
+	            <div class="modal-footer">
+	                <button type="button" onclick="saveEdit()">저장</button>
+	                <button type="button" onclick="closeModal()">닫기</button>
+	            </div>
 	        </form>
 	    </div>
 	</div>
@@ -251,6 +322,13 @@
 			            products.forEach(function (product) {
 			                tableContent += `
 			                    <tr>
+									<td>
+										<img src="${product.thumbnailUrl ? '/uploads/thumbnails/' + product.thumbnailUrl : '/uploads/thumbnails/default_thumbnail.jpg'}" 
+										     
+										     style="width: 50px; height: 50px; border-radius: 5px;" />
+
+										          </td>
+									
 			                        <td>${product.productId}</td>
 			                        <td>${product.productName}</td>
 			                        <td>${product.productPrice} 원</td>
@@ -260,11 +338,10 @@
 			                        <td>${product.discountRate}%</td>
 			                        <td>${product.productStock}</td>
 			                        <td>${product.productOptionId ? '옵션 있음' : '옵션 없음'}</td>
-			                        <td>${product.productContent}</td>
 			                        <td>${product.brand}</td>
 			                        <td>${product.manufacturer}</td>
 			                        <td>${product.productOrigin}</td>
-			                        <td>${product.productStatus}</td>
+			                        <td>${Number(product.productStatus) === 1 ? '렌탈 중' : '미렌탈'}</td>
 			                        <td>${product.deliveryMethod}</td>
 			                        <td>${product.deliveryCompany}</td>
 			                        <td>${product.deliveryPrice} 원</td>
@@ -274,6 +351,7 @@
 			                        <td>${product.approvalDate}</td>
 			                        <td>${product.approvalId}</td>
 			                        <td>${product.comments}</td>
+									
 			                        <td>
 			                            <button class="btn btn-warning btn-icon-split" onclick="editProduct('${product.productId}')">수정</button>
 			                        </td>
@@ -370,7 +448,18 @@
 			            document.getElementById("editCategoryDetails").value = product.productCategoryDetails;
 			            document.getElementById("editKeyword").value = product.productKeyword;
 			            document.getElementById("editStockQuantity").value = product.productStock;
-			            document.getElementById("editProductContent").value = product.productContent;
+			            
+						
+						// 추가된 항목들 채우기
+						document.getElementById("editProductStatus").value = product.productStatus;
+				        document.getElementById("editDeliveryMethod").value = product.deliveryMethod;
+				        document.getElementById("editDeliveryCompany").value = product.deliveryCompany;
+				        document.getElementById("editBrand").value = product.brand;
+				        document.getElementById("editManufacturer").value = product.manufacturer;
+				        document.getElementById("editProductOrigin").value = product.productOrigin;
+				        document.getElementById("editComments").value = product.comments;
+
+						
 			            // 모달 창 띄우기
 			            document.getElementById("editModal").style.display = "block";
 			        })
@@ -392,7 +481,16 @@
 			        productCategoryDetails: document.getElementById("editCategoryDetails").value,
 			        productKeyword: document.getElementById("editKeyword").value,
 			        productStock: document.getElementById("editStockQuantity").value,
-			        productContent: document.getElementById("editProductContent").value
+			    	
+					
+					// 추가된 항목들
+					 productStatus: document.getElementById("editProductStatus").value,
+					 deliveryMethod: document.getElementById("editDeliveryMethod").value,
+					 deliveryCompany: document.getElementById("editDeliveryCompany").value,
+					 brand: document.getElementById("editBrand").value,
+					 manufacturer: document.getElementById("editManufacturer").value,
+					 productOrigin: document.getElementById("editProductOrigin").value,
+					 comments: document.getElementById("editComments").value
 			    };
 
 			    fetch(`/management/products/${productId}`, {
@@ -455,6 +553,18 @@
 		        
 		        $.each(products, function(index, product) {
 					resultHtml += '<tr>';
+						
+					resultHtml += '<td>';
+					 
+					 // thumbnailUrl이 있으면 이미지를, 없으면 '이미지 없음'을 표시
+					 if (product.thumbnailUrl) {
+					     resultHtml += `<img src="${product.thumbnailUrl}" alt="상품 이미지" style="width: 50px; height: 50px; border-radius: 5px;">`;
+					 } else {
+					     resultHtml += '이미지 없음';
+					 }
+
+					 resultHtml += '</td>';	
+						
 		            resultHtml += '<td>' + product.productId + '</td>';
 		            resultHtml += '<td>' + product.productName + '</td>';
 		            resultHtml += '<td>' + product.productPrice + ' 원</td>';
@@ -464,11 +574,10 @@
 		            resultHtml += '<td>' + product.discountRate + '%</td>';
 		            resultHtml += '<td>' + product.productStock + '</td>';
 		            resultHtml += '<td>' + (product.productOptionId ? '옵션 있음' : '옵션 없음') + '</td>';
-		            resultHtml += '<td>' + product.productContent + '</td>';
 		            resultHtml += '<td>' + product.brand + '</td>';
 		            resultHtml += '<td>' + product.manufacturer + '</td>';
 		            resultHtml += '<td>' + product.productOrigin + '</td>';
-		            resultHtml += '<td>' + product.productStatus + '</td>';
+					resultHtml += '<td>' + (Number(product.productStatus) === 1 ? '렌탈중' : '미판매') + '</td>';
 		            resultHtml += '<td>' + product.deliveryMethod + '</td>';
 		            resultHtml += '<td>' + product.deliveryCompany + '</td>';
 		            resultHtml += '<td>' + product.deliveryPrice + ' 원</td>';
@@ -601,8 +710,8 @@
 					                        <td>${product.brand}</td>
 					                        <td>${product.manufacturer}</td>
 					                        <td>${product.productOrigin}</td>
-					                        <td>${product.productStatus}</td>
-					                        <td>${product.deliveryMethod}</td>
+											<td>${Number(product.productStatus) === 1 ? '렌탈중' : '미렌탈'}</td>
+d					                        <td>${product.deliveryMethod}</td>
 					                        <td>${product.deliveryCompany}</td>
 					                        <td>${product.deliveryPrice} 원</td>
 					                        <td>${product.address}</td>
