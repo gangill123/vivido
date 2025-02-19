@@ -12,10 +12,10 @@
 	</resultMap>
 
 
-
 	<!-- 전체 상품 조회 -->
-	<select id="getAllProducts" resultType="com.vivido.domain.ProductVO">
-		SELECT * FROM products
+	<select id="getAllProducts" resultType="com.vivido.domain.ProductVO"> SELECT
+		p.*, pi.thumbnail_url FROM products p LEFT JOIN product_image pi ON
+		p.product_id = pi.product_id ORDER BY p.create_date DESC 
 	</select>
 
 	<!-- 상품 삭제 -->
@@ -26,44 +26,46 @@
 	<!-- 상품 정보 조회 -->
 	<select id="getProductById" parameterType="String"
 		resultType="com.vivido.domain.ProductVO">
-		SELECT * FROM products WHERE product_id = #{productId}
+		SELECT p.*, pi.thumbnail_url
+		FROM products p
+		LEFT JOIN product_image pi ON p.product_id = pi.product_id
+		WHERE p.product_id = #{productId}
 	</select>
+
 
 	<!-- 상품 수정 -->
 	<update id="updateProduct" parameterType="com.vivido.domain.ProductVO">
-		UPDATE products <set>
-			<if test="productCategory != null"> product_category =
-		#{productCategory}, </if>
-			<if test="productCategoryDetails != null"> product_category_details
-		= #{productCategoryDetails}, </if>
-			<if test="productKeyword != null"> product_keyword =
-		#{productKeyword}, </if>
-			<if test="productName != null"> product_name = #{productName}, </if>
-			<if test="productPrice != null"> product_price = #{productPrice}, </if>
-			<if test="startDate != null"> start_date = #{startDate}, </if>
-			<if test="endDate != null"> end_date = #{endDate}, </if>
-			<if test="discountRate != null"> discount_rate = #{discountRate}, </if>
-			<if test="productStock != null"> product_stock = #{productStock}, </if>
-			<if test="productOptionId != null"> product_option_id =
-		#{productOptionId}, </if>
-			<if test="productContent != null"> product_content =
-		#{productContent}, </if>
-			<if test="brand != null"> brand = #{brand}, </if>
-			<if test="manufacturer != null"> manufacturer = #{manufacturer}, </if>
-			<if test="productOrigin != null"> product_origin = #{productOrigin}, </if>
-			<if test="productStatus != null"> product_status = #{productStatus}, </if>
-			<if test="deliveryMethod != null"> delivery_method =
-		#{deliveryMethod}, </if>
-			<if test="deliveryCompany != null"> delivery_company =
-		#{deliveryCompany}, </if>
-			<if test="deliveryPrice != null"> delivery_price = #{deliveryPrice}, </if>
-			<if test="address != null"> address = #{address}, </if>
-			<if test="approvalDate != null"> approval_date = #{approvalDate}, </if>
-			<if test="approvalId != null"> approval_id = #{approvalId}, </if>
-			<if test="comments != null"> comments = #{comments}, </if>
-		</set>
-		WHERE product_id = #{productId} </update>
-
+	    UPDATE products 
+	    <set>
+	        <if test="productCategory != null"> product_category = #{productCategory}, </if>
+	        <if test="productCategoryDetails != null"> product_category_details = #{productCategoryDetails}, </if>
+	        <if test="productKeyword != null"> product_keyword = #{productKeyword}, </if>
+	        <if test="productName != null"> product_name = #{productName}, </if>
+	        <if test="productPrice != null"> product_price = #{productPrice}, </if>
+	        <if test="startDate != null"> start_date = #{startDate}, </if>
+	        <if test="endDate != null"> end_date = #{endDate}, </if>
+	        <if test="discountRate != null"> discount_rate = #{discountRate}, </if>
+	        <if test="productStock != null"> product_stock = #{productStock}, </if>
+	        <if test="productOptionId != null"> product_option_id = #{productOptionId}, </if>
+	        <if test="productContent != null"> product_content = #{productContent}, </if>
+	        <if test="brand != null"> brand = #{brand}, </if>
+	        <if test="manufacturer != null"> manufacturer = #{manufacturer}, </if>
+	        <if test="productOrigin != null"> product_origin = #{productOrigin}, </if>
+	        <if test="productStatus != null"> product_status = #{productStatus}, </if>
+	        <if test="deliveryMethod != null"> delivery_method = #{deliveryMethod}, </if>
+	        <if test="deliveryCompany != null"> delivery_company = #{deliveryCompany}, </if>
+	        <if test="deliveryPrice != null"> delivery_price = #{deliveryPrice}, </if>
+	        <if test="address != null"> address = #{address}, </if>
+	        <if test="approvalDate != null"> approval_date = #{approvalDate}, </if>
+	        <if test="approvalId != null"> approval_id = #{approvalId}, </if>
+	        <if test="comments != null"> comments = #{comments}, </if>
+	        <!-- 자동으로 현재 날짜를 설정 -->
+	        <if test="updateDate == null"> update_date = CURRENT_DATE, </if>
+	    </set>
+	    WHERE product_id = #{productId}
+	</update>
+	
+	
 	<!-- 페이징 처리 쿼리 -->
 	<select id="selectProducts" resultType="com.vivido.domain.ProductVO"> SELECT
 		* FROM products LIMIT #{pageSize} OFFSET #{offset}; <!-- OFFSET과 LIMIT을
@@ -92,13 +94,13 @@
         AND create_date = #{createDate}
     </if>
 	</select>
-	
-  <!-- 카테고리에 맞는조회 -->
+
+	<!-- 카테고리에 맞는조회 -->
     <select id="getSubcategoriesByCategory" resultType="com.vivido.domain.ProductVO">
       SELECT * FROM products WHERE product_category = #{productCategory}
     </select>
 
-    <!-- 카테고리와 세분류에 맞는 상품 목록 조회 -->
+	<!-- 카테고리와 세분류에 맞는 상품 목록 조회 -->
     <select id="getProductsByCategoryAndSubcategory" resultType="com.vivido.domain.ProductVO">
         SELECT *
         FROM products
@@ -109,9 +111,9 @@
 	 
 	<select id="getRentalCounts" resultMap="rentalCountMap">
 	   SELECT 
-	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE start_date &lt;= NOW()) AS rentedCount,
-	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products WHERE start_date > NOW()) AS availableCount,
-	       (SELECT CAST(COUNT(*) AS SIGNED) FROM products) AS totalCount
+	       (SELECT COUNT(*) FROM products WHERE product_status = 1) AS rentedCount,   
+	       (SELECT COUNT(*) FROM products WHERE product_status = 0) AS availableCount, 
+	       (SELECT COUNT(*) FROM products) AS totalCount
 	   FROM DUAL
 	</select>
 
