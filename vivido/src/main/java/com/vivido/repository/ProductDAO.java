@@ -10,6 +10,8 @@ public interface ProductDAO {
 	public List<ProductVO> getAllProducts();
 
 	public int deleteProductById(String productId);
+	
+	public int deleteProductsByIds(List<String> productIds) ;
 
 	// 상품 정보 조회
 	public ProductVO getProductById(String productId);
@@ -28,6 +30,9 @@ public interface ProductDAO {
 	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
 
 	public Map<String, Integer> getRentalCounts();
+	
+    List<ProductVO> getProductsByIds(List<String> productIds);
+
 
     // 상품 등록
     void insertProduct(ProductVO productVO);

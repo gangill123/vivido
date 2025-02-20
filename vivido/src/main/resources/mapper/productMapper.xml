@@ -10,18 +10,41 @@
 		<result column="availableCount" property="availableCount" javaType="int" />
 		<result column="totalCount" property="totalCount" javaType="int" />
 	</resultMap>
+	
+	
+	
+	<resultMap id="productResultMap" type="com.vivido.domain.ProductVO">
+	    <result property="productId" column="product_id" />
+	    <result property="thumbnailUrl" column="thumbnail_url" />
+	    <!-- 다른 필드들도 매핑 -->
+	</resultMap>
 
 
 	<!-- 전체 상품 조회 -->
-	<select id="getAllProducts" resultType="com.vivido.domain.ProductVO"> SELECT
-		p.*, pi.thumbnail_url FROM products p LEFT JOIN product_image pi ON
-		p.product_id = pi.product_id ORDER BY p.create_date DESC 
-	</select>
+<select id="getAllProducts" resultType="com.vivido.domain.ProductVO">
+    SELECT
+        p.*, pi.thumbnail_url 
+    FROM products p 
+    LEFT JOIN product_image pi ON p.product_id = pi.product_id 
+    ORDER BY p.create_date DESC 
+</select>
 
 	<!-- 상품 삭제 -->
 	<delete id="deleteProductById" parameterType="String">
 		DELETE FROM products WHERE product_id = #{productId};
 	</delete>
+	
+		<!-- 여러 상품 삭제 -->
+<delete id="deleteProductsByIds">
+    DELETE FROM products
+    WHERE product_id IN
+    <foreach item="item" collection="list" open="(" separator="," close=")">
+        #{item}
+    </foreach>
+</delete>
+
+
+
 
 	<!-- 상품 정보 조회 -->
 	<select id="getProductById" parameterType="String"
@@ -66,49 +89,64 @@
 	</update>
 	
 	
-	<!-- 페이징 처리 쿼리 -->
-	<select id="selectProducts" resultType="com.vivido.domain.ProductVO"> SELECT
-		* FROM products LIMIT #{pageSize} OFFSET #{offset}; <!-- OFFSET과 LIMIT을
-		사용하여 페이징 처리 -->
-	</select>
+<select id="selectProducts" resultType="com.vivido.domain.ProductVO">
+    SELECT
+        p.*, pi.thumbnail_url 
+    FROM products p
+    LEFT JOIN product_image pi ON p.product_id = pi.product_id
+    LIMIT #{pageSize} OFFSET #{offset};
+</select>
+
 
 	<!-- 상품 총 개수 조회 -->
 	<select id="getTotalProductCount" resultType="int">
 		SELECT COUNT(*) FROM products
 	</select>
+	
 	<!-- 카테고리별 상품 검색 -->
-	<select id="searchProducts" resultType="com.vivido.domain.ProductVO"> 
-  SELECT * 
-    FROM products
+<select id="searchProducts" resultType="com.vivido.domain.ProductVO">
+    SELECT
+        p.*, 
+        pi.thumbnail_url
+    FROM products p
+    LEFT JOIN product_image pi ON p.product_id = pi.product_id
     WHERE 1=1
     <if test="productName != null and productName != ''">
-        AND product_name LIKE CONCAT('%', #{productName}, '%')
+        AND p.product_name LIKE CONCAT('%', #{productName}, '%')
     </if>
     <if test="productId != null and productId != ''">
-        AND product_id = #{productId}
+        AND p.product_id = #{productId}
     </if>
     <if test="productKeyword != null and productKeyword != ''">
-        AND product_keyword LIKE CONCAT('%', #{productKeyword}, '%')
+        AND p.product_keyword LIKE CONCAT('%', #{productKeyword}, '%')
     </if>
     <if test="createDate != null">
-        AND create_date = #{createDate}
+        AND p.create_date = #{createDate}
     </if>
-	</select>
+</select>
 
-	<!-- 카테고리에 맞는조회 -->
-    <select id="getSubcategoriesByCategory" resultType="com.vivido.domain.ProductVO">
-      SELECT * FROM products WHERE product_category = #{productCategory}
-    </select>
+<!-- 카테고리에 맞는 상품 조회 -->
+<select id="getSubcategoriesByCategory" resultType="com.vivido.domain.ProductVO">
+    SELECT
+        p.*, 
+        pi.thumbnail_url
+    FROM products p
+    LEFT JOIN product_image pi ON p.product_id = pi.product_id
+    WHERE p.product_category = #{productCategory}
+</select>
 
-	<!-- 카테고리와 세분류에 맞는 상품 목록 조회 -->
-    <select id="getProductsByCategoryAndSubcategory" resultType="com.vivido.domain.ProductVO">
-        SELECT *
-        FROM products
-        WHERE product_category = #{productCategory}
-        AND product_category_details = #{productCategoryDetails}
-        ORDER BY create_date DESC;
-    </select>
-	 
+<!-- 카테고리와 세분류에 맞는 상품 목록 조회 -->
+<select id="getProductsByCategoryAndSubcategory" resultType="com.vivido.domain.ProductVO">
+    SELECT
+        p.*, 
+        pi.thumbnail_url
+    FROM products p
+    LEFT JOIN product_image pi ON p.product_id = pi.product_id
+    WHERE p.product_category = #{productCategory}
+    AND p.product_category_details = #{productCategoryDetails}
+    ORDER BY p.create_date DESC;
+</select>
+	 <!--렌탈 카운트-->
 	<select id="getRentalCounts" resultMap="rentalCountMap">
 	   SELECT 
 	       (SELECT COUNT(*) FROM products WHERE product_status = 1) AS rentedCount,   
@@ -116,7 +154,15 @@
 	       (SELECT COUNT(*) FROM products) AS totalCount
 	   FROM DUAL
 	</select>
-
+<!--엑셀-->
+    <select id="getProductsByIds" resultType="com.vivido.domain.ProductVO">
+        SELECT product_id, product_name, product_category, product_price, product_stock, create_date
+        FROM products
+        WHERE product_id IN
+        <foreach collection="list" item="productId" open="(" close=")" separator=",">
+            #{productId}
+        </foreach>
+    </select>
 
 	<!-- 상품 등록 -->
 	<insert id="insertProduct" parameterType="com.vivido.domain.ProductVO">

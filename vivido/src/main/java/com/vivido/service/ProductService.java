@@ -5,12 +5,16 @@ import java.util.Map;
 
 import com.vivido.domain.ProductVO;
 
+import jakarta.servlet.http.HttpServletResponse;
+
 
 public interface ProductService {
 
 	public List<ProductVO> getAllProducts();
 
 	public boolean deleteProductById(String productId);
+	
+	public boolean deleteProductsByIds(List<String> productIds);
 	
 	public ProductVO getProductById(String productId);
 
@@ -27,6 +31,8 @@ public interface ProductService {
 	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
 	
 	Map<String, Integer> getRentalCounts();
+	
+	public byte[] exportProductsToExcel(List<String> productIds, HttpServletResponse response);
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	 public void registerProduct(ProductVO productVO, List<ProductVO> productImages);

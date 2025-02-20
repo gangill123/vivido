@@ -1,10 +1,23 @@
 package com.vivido.controller;
 
+
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.ContentDisposition;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
+
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,12 +32,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
 import javax.imageio.ImageIO;
+
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -37,12 +55,18 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.vivido.domain.ProductVO;
 import com.vivido.service.ProductService;
 
+
+
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+
+
 import ch.qos.logback.core.model.Model;
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("/management/products")
@@ -69,6 +93,18 @@ public class ProductRestController {
 	@DeleteMapping("/{productId}")
 	public ResponseEntity<Void> deleteProduct(@PathVariable String productId) {
 		boolean isDeleted = productService.deleteProductById(productId);
+		if (isDeleted) {
+			return ResponseEntity.noContent().build(); // 204 No Content
+		} else {
+			return ResponseEntity.notFound().build(); // 404 Not Found
+		}
+	}
+
+	@DeleteMapping("/delete")
+	public ResponseEntity<Void> deleteSelectedProducts(@RequestBody Map<String, List<String>> requestBody) {
+		List<String> productIds = requestBody.get("productIds");
+
+		boolean isDeleted = productService.deleteProductsByIds(productIds); // 여러 개 상품 삭제
 		if (isDeleted) {
 			return ResponseEntity.noContent().build(); // 204 No Content
 		} else {
@@ -152,9 +188,31 @@ public class ProductRestController {
 	public Map<String, Integer> getRentalStatus() {
 		return productService.getRentalCounts();
 	}
-	//////////////////////////// 상품 목록 페이지 끝////////////////////////////////
 
-	//////////////////////////// 상품 등록 페이지 시작////////////////////////////////
+	@PostMapping("/exportProducts")
+	public void exportProductsToExcel(@RequestBody Map<String, List<String>> requestBody, HttpServletResponse response) {
+	    // 클라이언트로부터 받은 상품 ID 리스트를 추출
+	    List<String> productIds = requestBody.get("productIds");
+
+	    // 서비스에서 엑셀 생성 후 HttpServletResponse를 통해 파일 반환
+	    byte[] excelFile = productService.exportProductsToExcel(productIds, response);
+
+	    // 예외처리: 파일 생성에 실패한 경우 (service에서 예외처리가 이미 이루어지므로 여기서도 실패처리 가능)
+	    if (excelFile == null) {
+	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+	        try {
+	            response.getWriter().write("파일 생성에 실패했습니다.");
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
+	    }
+	}
+	    
+    
+
+////////////////////////////상품 목록 페이지 끝////////////////////////////////
+
+//////////////////////////// 상품 등록 페이지 시작////////////////////////////////
 
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> registerProduct(@RequestParam("productId") String productId,
@@ -183,36 +241,31 @@ public class ProductRestController {
 		productVO.setProductOrigin(productOrigin);
 		productVO.setCreateDate(LocalDate.parse(createDate));
 		productVO.setComments(comments);
-
 		// 이미지 파일 저장 및 썸네일 생성
 		List<ProductVO> productImageList = new ArrayList<>();
 		if (productImages != null) {
-		    for (MultipartFile imageFile : productImages) {
-		        try {
-		            // 이미지 파일 저장 (경로 없이 파일명만 반환)
-		            String imageFileName = saveImage(imageFile);
+			for (MultipartFile imageFile : productImages) {
+				try {
+					// 이미지 파일 저장 (파일명만 반환됨)
+					String imageFileName = saveImage(imageFile);
 
-		            // 원본 이미지 파일 객체 생성 (저장된 디렉터리 경로를 추가)
-		            // C:/uploads/ -> src/main/resources/static/uploads/
-		            File originalImageFile = new File("src/main/resources/static/uploads/" + imageFileName);
+					// 썸네일 생성 (파일명만 반환됨)
+					String thumbnailFileName = createThumbnail(imageFileName); // File 객체 대신 파일명 전달
 
-		            // 썸네일 생성 (파일명만 반환)
-		            String thumbnailFileName = createThumbnail(originalImageFile);
-
-		            // ProductVO에 이미지 정보 설정
-		            ProductVO productImageVO = new ProductVO();
-		            productImageVO.setProductId(productId);
-		            productImageVO.setImageUrl("/uploads/" + imageFileName); // 상대 URL로 반환 (웹에서 접근 가능)
-		            productImageVO.setThumbnailUrl("/uploads/thumbnails/" + thumbnailFileName); // 상대 URL로 썸네일 경로 설정
-		            productImageVO.setIsPrimary(false); // 기본 이미지는 false로 설정 (필요에 따라 true로 변경)
-		            productImageVO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-		            productImageList.add(productImageVO);
-		        } catch (IOException e) {
-		            response.put("status", "error");
-		            response.put("message", "이미지 처리 중 오류가 발생했습니다: " + e.getMessage());
-		            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-		        }
-		    }
+					// ProductVO에 이미지 정보 설정
+					ProductVO productImageVO = new ProductVO();
+					productImageVO.setProductId(productId);
+					productImageVO.setImageUrl(imageFileName); // 원본 파일명만 저장
+					productImageVO.setThumbnailUrl(thumbnailFileName); // 썸네일 파일명만 저장
+					productImageVO.setIsPrimary(false);
+					productImageVO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+					productImageList.add(productImageVO);
+				} catch (IOException e) {
+					response.put("status", "error");
+					response.put("message", "이미지 처리 중 오류가 발생했습니다: " + e.getMessage());
+					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+				}
+			}
 		}
 
 		try {
@@ -229,91 +282,85 @@ public class ProductRestController {
 	}
 
 	private String saveImage(MultipartFile file) throws IOException {
-	    // 실제 업로드할 디렉터리 경로 (운영 환경에서 접근 가능한 경로)
-	    String directory = "src/main/resources/static/uploads/"; // 상대 경로로 변경
-	    
-	    // 파일 이름을 UUID로 변경하여 중복 방지
-	    String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+		String directory = "C:/uploads/"; // 파일 저장 경로
 
-	    // 저장할 디렉터리 경로를 지정
-	    File uploadDir = new File(directory);
-	    if (!uploadDir.exists()) {
-	        uploadDir.mkdirs(); // 디렉터리가 없으면 생성
-	    }
+		// UUID를 사용하여 중복 방지
+		String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-	    // 파일을 해당 경로에 저장
-	    File dest = new File(uploadDir, fileName);
-	    
-	    if (!dest.exists()) {
-	        dest.createNewFile(); // 파일이 없으면 새로운 파일 생성
-	    }
-	    
-	    file.transferTo(dest); // IOException 발생 가능
+		// 디렉터리 생성
+		File uploadDir = new File(directory);
+		if (!uploadDir.exists()) {
+			uploadDir.mkdirs();
+		}
 
-	    // 저장된 이미지 URL 반환 (웹에서 접근할 수 있도록)
-	    return "/uploads/" + fileName;
+		// 파일 저장
+		File dest = new File(uploadDir, fileName);
+		file.transferTo(dest);
 
+		// **파일명만 반환 (경로 제외)**
+		return fileName;
 	}
 
-	private String createThumbnail(File originalImageFile) throws IOException {
-	    // 프로젝트의 상대 경로로 설정 (예: static/thumbnails 디렉토리)
-	    String thumbnailDir = "src/main/resources/static/uploads/thumbnails/";  // 상대 경로
+	private String createThumbnail(String imageFileName) throws IOException {
+		String directory = "C:/uploads/"; // 원본 이미지 파일이 저장된 경로
+		String thumbnailDir = "C:/uploads/thumbnails/"; // 썸네일 저장 경로
 
-	    File thumbnailDirectory = new File(thumbnailDir);
-	    if (!thumbnailDirectory.exists()) {
-	        thumbnailDirectory.mkdirs(); // 디렉터리가 없다면 생성
-	    }
+		File originalImageFile = new File(directory + imageFileName);
+		File thumbnailDirectory = new File(thumbnailDir);
 
-	    // 썸네일 파일 이름 생성
-	    String thumbnailFileName = originalImageFile.getName().replace(".", "_thumb.");
-	    File thumbnailFile = new File(thumbnailDirectory, thumbnailFileName);
+		if (!thumbnailDirectory.exists()) {
+			thumbnailDirectory.mkdirs();
+		}
 
-	    // 썸네일 이미지 생성 (예시: 150x150 크기로 리사이즈)
-	    BufferedImage originalImage = ImageIO.read(originalImageFile);
-	    int thumbnailWidth = 150;
-	    int thumbnailHeight = 150;
-	    BufferedImage thumbnailImage = new BufferedImage(thumbnailWidth, thumbnailHeight, BufferedImage.TYPE_INT_RGB);
-	    thumbnailImage.getGraphics().drawImage(originalImage, 0, 0, thumbnailWidth, thumbnailHeight, null);
+		// 썸네일 파일 이름 생성
+		String thumbnailFileName = imageFileName.replace(".", "_thumb.");
+		File thumbnailFile = new File(thumbnailDirectory, thumbnailFileName);
 
-	    // 썸네일 파일 저장
-	    ImageIO.write(thumbnailImage, "jpg", thumbnailFile); // 파일 형식은 필요에 따라 변경
+		// 원본 이미지 읽기 및 썸네일 생성
+		BufferedImage originalImage = ImageIO.read(originalImageFile);
+		int thumbnailWidth = 150;
+		int thumbnailHeight = 150;
+		BufferedImage thumbnailImage = new BufferedImage(thumbnailWidth, thumbnailHeight, BufferedImage.TYPE_INT_RGB);
+		thumbnailImage.getGraphics().drawImage(originalImage, 0, 0, thumbnailWidth, thumbnailHeight, null);
 
-	    // 썸네일 URL 반환
-	    return "/uploads/thumbnails/" + thumbnailFileName; // 웹에서 접근할 수 있는 경로
+		// 썸네일 저장
+		ImageIO.write(thumbnailImage, "jpg", thumbnailFile);
+
+		// **썸네일 파일명만 반환**
+		return thumbnailFileName;
 	}
-	
-	   private static final String UPLOAD_DIR = "C:/uploads/summer"; // 업로드 폴더 경로
 
-	 @PostMapping("/uploadImage")
-	    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
-	        Map<String, String> response = new HashMap<>();
+	private static final String UPLOAD_DIR = "C:/uploads/summer"; // 업로드 폴더 경로
 
-	        try {
-	            // 업로드 디렉토리 경로
-	            Path uploadPath = Paths.get(UPLOAD_DIR);
-	            
-	            // 디렉토리가 존재하지 않으면 폴더 생성
-	            if (!Files.exists(uploadPath)) {
-	                Files.createDirectories(uploadPath);  // 폴더 생성
-	            }
+	@PostMapping("/uploadImage")
+	public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+		Map<String, String> response = new HashMap<>();
 
-	            // 파일 이름 설정 (UUID 사용 등)
-	            String fileName = UUID.randomUUID().toString() + ".jpg"; 
-	            Path filePath = uploadPath.resolve(fileName);  // 파일 경로 생성
+		try {
+			// 업로드 디렉토리 경로
+			Path uploadPath = Paths.get(UPLOAD_DIR);
 
-	            // 파일을 업로드 디렉토리에 저장
-	            file.transferTo(filePath);
+			// 디렉토리가 존재하지 않으면 폴더 생성
+			if (!Files.exists(uploadPath)) {
+				Files.createDirectories(uploadPath); // 폴더 생성
+			}
 
-	            // 업로드된 파일의 URL 반환
-	            response.put("fileUrl", "/uploads/" + fileName);
+			// 파일 이름 설정 (UUID 사용 등)
+			String fileName = UUID.randomUUID().toString() + ".jpg";
+			Path filePath = uploadPath.resolve(fileName); // 파일 경로 생성
 
-	            return ResponseEntity.ok(response);
-	        } catch (IOException e) {
-	            response.put("error", "파일 업로드 실패");
-	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-	        }
-	    }
+			// 파일을 업로드 디렉토리에 저장
+			file.transferTo(filePath);
 
+			// 업로드된 파일의 URL 반환
+			response.put("fileUrl", "/uploads/" + fileName);
+
+			return ResponseEntity.ok(response);
+		} catch (IOException e) {
+			response.put("error", "파일 업로드 실패");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
+	}
 
 	//////////////////////////// 상품 등록 페이지 끝////////////////////////////////
 
