@@ -23,7 +23,9 @@ public class ProductDAOImpl implements ProductDAO {
 
 	@Override
 	public List<ProductVO> getAllProducts() {
-		return sqlSession.selectList(NAMESPACE + ".getAllProducts");
+	    List<ProductVO> products = sqlSession.selectList(NAMESPACE + ".getAllProducts");
+	    System.out.println(products);  // 결과가 정상적으로 반환되는지 확인
+	    return products;  // 로그 찍은 후에 반환
 	}
 
 	// 상품 삭제 로직
@@ -31,6 +33,11 @@ public class ProductDAOImpl implements ProductDAO {
 	public int deleteProductById(String productId) {
 		return sqlSession.delete(NAMESPACE + ".deleteProductById", productId);
 	}
+	@Override
+	public int deleteProductsByIds(List<String> productIds) {
+	    return sqlSession.delete(NAMESPACE + ".deleteProductsByIds", productIds);
+	}
+	
 
 	// 상품 정보 조회
 	@Override
@@ -84,6 +91,12 @@ public class ProductDAOImpl implements ProductDAO {
 	public Map<String, Integer> getRentalCounts() {
 		return sqlSession.selectOne(NAMESPACE + ".getRentalCounts");
 	}
+	@Override
+	public List<ProductVO> getProductsByIds(List<String> productIds) {
+	    return sqlSession.selectList(NAMESPACE + ".getProductsByIds", productIds);
+
+	}
+	
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	@Override

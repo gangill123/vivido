@@ -62,6 +62,14 @@ public class ProductVO {
     public void setIsPrimary(boolean isPrimary) {
         this.isPrimary = isPrimary;
     }
+    // getter and setter
+    public String getThumbnailUrl() {
+        return thumbnailUrl;
+    }
+
+    public void setThumbnailUrl(String thumbnailUrl) {
+        this.thumbnailUrl = thumbnailUrl;
+    }
     
     
     

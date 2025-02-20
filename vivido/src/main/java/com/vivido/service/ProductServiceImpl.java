@@ -1,15 +1,31 @@
 package com.vivido.service;
 
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.HashMap;
+
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
+
 import com.vivido.domain.ProductVO;
 import com.vivido.repository.ProductDAO;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -25,8 +41,16 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	// 상품 삭제 로직
 	public boolean deleteProductById(String productId) {
+
 		return productDAO.deleteProductById(productId) > 0;
 	}
+	
+	@Override
+	// 여러 상품 삭제 로직
+	public boolean deleteProductsByIds(List<String> productIds) {
+	    return productDAO.deleteProductsByIds(productIds) > 0;
+	}
+	
 
 	@Override
 	public ProductVO getProductById(String productId) {
@@ -57,7 +81,13 @@ public class ProductServiceImpl implements ProductService {
 
 		// 5. 해당 페이지에 해당하는 데이터 조회
 		List<ProductVO> products = productDAO.selectProducts(offset, pageSize);
+		
+		 // 각 상품의 썸네일 URL 확인 (디버깅)
+	    for (ProductVO product : products) {
+	        System.out.println("Product ID: " + product.getProductId() + ", Thumbnail URL: " + product.getThumbnailUrl());
+	    }
 
+		
 		// 6. 페이징 정보를 포함한 결과 반환
 		Map<String, Object> response = new HashMap<>();
 		response.put("products", products); // 실제 데이터 리스트
@@ -103,6 +133,89 @@ public class ProductServiceImpl implements ProductService {
 	public Map<String, Integer> getRentalCounts() {
 		return productDAO.getRentalCounts();
 	}
+	
+	@Override
+	public byte[] exportProductsToExcel(List<String> productIds, HttpServletResponse response) {
+	    List<ProductVO> products = productDAO.getProductsByIds(productIds);
+
+	    // 엑셀 생성
+	    try (Workbook workbook = new XSSFWorkbook(); // .xlsx 형식의 엑셀 파일을 생성
+	         ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+
+	        Sheet sheet = workbook.createSheet("Products");
+
+	        // 헤더 작성
+	        Row headerRow = sheet.createRow(0);
+	        String[] headers = {"상품 ID", "상품명", "카테고리", "가격", "재고", "등록일"};
+	        for (int i = 0; i < headers.length; i++) {
+	            headerRow.createCell(i).setCellValue(headers[i]);
+	        }
+
+	        // 날짜 셀 스타일 생성
+	        CellStyle dateCellStyle = workbook.createCellStyle();
+	        CreationHelper createHelper = workbook.getCreationHelper();
+	        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
+
+	        // 상품 데이터 작성
+	        int rowNum = 1;
+	        for (ProductVO product : products) {
+	            Row row = sheet.createRow(rowNum++);
+	            row.createCell(0).setCellValue(product.getProductId());  // 상품 ID
+	            row.createCell(1).setCellValue(product.getProductName());  // 상품명
+	            row.createCell(2).setCellValue(product.getProductCategory());  // 카테고리
+	            row.createCell(3).setCellValue(product.getProductPrice());  // 가격
+	            row.createCell(4).setCellValue(product.getProductStock());  // 재고
+
+	            // 등록일을 날짜로 처리하여 셀에 설정
+	            if (product.getCreateDate() != null) {
+	                // LocalDate를 java.util.Date로 변환
+	                java.util.Date utilDate = Date.from(product.getCreateDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
+	                
+	                Cell dateCell = row.createCell(5);
+	                dateCell.setCellValue(utilDate);  // 날짜 값 설정
+	                dateCell.setCellStyle(dateCellStyle);  // 날짜 셀 스타일 적용
+	            } else {
+	                row.createCell(5).setCellValue("");  // 등록일이 null인 경우 빈 셀
+	            }
+	        }
+
+	        // 엑셀 파일을 ByteArrayOutputStream에 작성
+	        workbook.write(bos);
+
+	        // 파일 이름 설정 (확장자 .xlsx)
+	        String fileName = "products.xlsx";
+
+	        // 파일명에서 공백을 제거하거나 다른 문자로 대체 (예: _로 대체)
+	        fileName = fileName.replace(" ", "_");
+
+	        // HttpServletResponse에 헤더 추가하여 파일 다운로드 준비
+	        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+	        // 바이트 배열로 반환하여 응답에 파일 내용 전달
+	        response.getOutputStream().write(bos.toByteArray());
+	        response.getOutputStream().flush();  // 스트림 내용을 강제로 전송
+
+	        // 엑셀 컬럼 자동 크기 조정
+	        for (int i = 0; i < headers.length; i++) {
+	            sheet.autoSizeColumn(i);
+	        }
+
+	        return bos.toByteArray();
+
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	        // 로깅이나 추가적인 예외 처리가 필요할 수 있음
+	        return null;
+	    }
+	}
+
+
+
+
+    
+	
+	
 
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	 // 상품 등록
