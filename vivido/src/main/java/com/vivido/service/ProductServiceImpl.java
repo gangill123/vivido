@@ -3,8 +3,8 @@ package com.vivido.service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.HashMap;
@@ -135,7 +135,7 @@ public class ProductServiceImpl implements ProductService {
 	}
 	
 	@Override
-	public byte[] exportProductsToExcel(List<String> productIds, HttpServletResponse response) {
+	public byte[] exportProductsToExcel(List<String> productIds) {
 	    List<ProductVO> products = productDAO.getProductsByIds(productIds);
 
 	    // 엑셀 생성
@@ -170,7 +170,8 @@ public class ProductServiceImpl implements ProductService {
 	            if (product.getCreateDate() != null) {
 	                // LocalDate를 java.util.Date로 변환
 	                java.util.Date utilDate = Date.from(product.getCreateDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-	                
+
+	                // 날짜 셀 생성
 	                Cell dateCell = row.createCell(5);
 	                dateCell.setCellValue(utilDate);  // 날짜 값 설정
 	                dateCell.setCellStyle(dateCellStyle);  // 날짜 셀 스타일 적용
@@ -179,36 +180,25 @@ public class ProductServiceImpl implements ProductService {
 	            }
 	        }
 
-	        // 엑셀 파일을 ByteArrayOutputStream에 작성
-	        workbook.write(bos);
-
-	        // 파일 이름 설정 (확장자 .xlsx)
-	        String fileName = "products.xlsx";
-
-	        // 파일명에서 공백을 제거하거나 다른 문자로 대체 (예: _로 대체)
-	        fileName = fileName.replace(" ", "_");
-
-	        // HttpServletResponse에 헤더 추가하여 파일 다운로드 준비
-	        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
-	        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
-	        // 바이트 배열로 반환하여 응답에 파일 내용 전달
-	        response.getOutputStream().write(bos.toByteArray());
-	        response.getOutputStream().flush();  // 스트림 내용을 강제로 전송
-
 	        // 엑셀 컬럼 자동 크기 조정
 	        for (int i = 0; i < headers.length; i++) {
 	            sheet.autoSizeColumn(i);
 	        }
 
-	        return bos.toByteArray();
+	        // 엑셀 파일을 ByteArrayOutputStream에 작성
+	        workbook.write(bos);
+	        bos.flush();  // 버퍼를 플러시하여 데이터가 완전히 기록되도록 함
 
+
+	        return bos.toByteArray();  // 최종적으로 바이트 배열로 반환
 	    } catch (IOException e) {
 	        e.printStackTrace();
-	        // 로깅이나 추가적인 예외 처리가 필요할 수 있음
-	        return null;
+	        return null;  // 오류 발생 시 null 반환
 	    }
 	}
+
+
+
 
 
 

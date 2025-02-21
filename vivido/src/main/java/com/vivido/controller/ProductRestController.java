@@ -190,22 +190,26 @@ public class ProductRestController {
 	}
 
 	@PostMapping("/exportProducts")
-	public void exportProductsToExcel(@RequestBody Map<String, List<String>> requestBody, HttpServletResponse response) {
+	public ResponseEntity<byte[]> exportProductsToExcel(@RequestBody Map<String, List<String>> requestBody) {
 	    // 클라이언트로부터 받은 상품 ID 리스트를 추출
 	    List<String> productIds = requestBody.get("productIds");
 
-	    // 서비스에서 엑셀 생성 후 HttpServletResponse를 통해 파일 반환
-	    byte[] excelFile = productService.exportProductsToExcel(productIds, response);
+	    // 서비스에서 엑셀 파일 생성
+	    byte[] excelFile = productService.exportProductsToExcel(productIds);
 
-	    // 예외처리: 파일 생성에 실패한 경우 (service에서 예외처리가 이미 이루어지므로 여기서도 실패처리 가능)
-	    if (excelFile == null) {
-	        response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-	        try {
-	            response.getWriter().write("파일 생성에 실패했습니다.");
-	        } catch (IOException e) {
-	            e.printStackTrace();
-	        }
+	    // 엑셀 파일 생성 실패 시 예외 처리
+	    if (excelFile == null || excelFile.length == 0) {
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+	                .body("파일 생성에 실패했습니다.".getBytes());
 	    }
+
+	    // 엑셀 파일을 반환하면서 다운로드를 위한 헤더 추가
+	    HttpHeaders headers = new HttpHeaders();
+	    headers.add("Content-Disposition", "attachment; filename=selected_products.xlsx");
+	    headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+	    // 엑셀 파일을 응답으로 반환
+	    return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
 	}
 	    
     

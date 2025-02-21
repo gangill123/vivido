@@ -131,12 +131,13 @@
 		</div>
 
 		<!-- 선택 삭제 버튼 -->
-		<button class="btn btn-danger btn-icon-split" onclick="deleteSelectedProducts()" style="margin-left: 20px; padding: 4px 5px; font-size: 12px;">
+		<button id="deleteSelectedButton" class="btn btn-danger btn-icon-split" style="margin-left: 20px; padding: 4px 5px; font-size: 12px;">
 		    <span class="icon text-white-50" style="font-size: 14px;">
-		         <i class="fas fa-trash"></i> 
-		     </span>
+		        <i class="fas fa-trash"></i>
+		    </span>
 		    <span class="text"> 삭제</span>
 		</button>
+
 
 		<!-- 엑셀로 내보내기 버튼 -->
 		<button class="btn btn-success btn-icon-split" onclick="exportToExcel()"style="margin-left: 10px; padding: 6px 12px; font-size: 12px;">
@@ -570,6 +571,8 @@
 			    }
 			}
 			
+			
+
 			$(document).ready(function() {
 			        // 전체 선택 체크박스
 			        $('#selectAll').click(function() {
