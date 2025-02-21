@@ -32,7 +32,7 @@ public interface ProductService {
 	
 	Map<String, Integer> getRentalCounts();
 	
-	public byte[] exportProductsToExcel(List<String> productIds, HttpServletResponse response);
+	public byte[] exportProductsToExcel(List<String> productIds);
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	 public void registerProduct(ProductVO productVO, List<ProductVO> productImages);
