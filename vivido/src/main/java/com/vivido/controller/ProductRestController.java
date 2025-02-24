@@ -14,11 +14,22 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import org.springframework.core.io.FileSystemResource;
+
+
+
+import org.springframework.core.io.Resource;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RestController;
+
 
 import java.io.File;
 import java.io.FileNotFoundException;
 
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,6 +51,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.FileSystemResourceLoader;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 
@@ -188,31 +201,34 @@ public class ProductRestController {
 	public Map<String, Integer> getRentalStatus() {
 		return productService.getRentalCounts();
 	}
-
+	
 	@PostMapping("/exportProducts")
-	public ResponseEntity<byte[]> exportProductsToExcel(@RequestBody Map<String, List<String>> requestBody) {
-	    // 클라이언트로부터 받은 상품 ID 리스트를 추출
+	public ResponseEntity<?> exportProductsToExcel(@RequestBody Map<String, List<String>> requestBody) {
+	    // 상품 ID 목록을 받아옵니다.
 	    List<String> productIds = requestBody.get("productIds");
 
-	    // 서비스에서 엑셀 파일 생성
+	    // 엑셀 파일 생성
 	    byte[] excelFile = productService.exportProductsToExcel(productIds);
 
-	    // 엑셀 파일 생성 실패 시 예외 처리
+	    // 엑셀 파일 생성에 실패한 경우
 	    if (excelFile == null || excelFile.length == 0) {
+	        String errorMessage = "파일 생성에 실패했습니다.";
+	        // 오류 메시지 반환
 	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-	                .body("파일 생성에 실패했습니다.".getBytes());
+	                             .body(errorMessage);  // 오류 메시지는 문자열로 반환
 	    }
 
-	    // 엑셀 파일을 반환하면서 다운로드를 위한 헤더 추가
+	    // 파일 다운로드 헤더 설정
 	    HttpHeaders headers = new HttpHeaders();
-	    headers.add("Content-Disposition", "attachment; filename=selected_products.xlsx");
-	    headers.add("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	    headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+	    headers.setContentDisposition(ContentDisposition.attachment().filename("products.xlsx").build());
+	    headers.setContentLength(excelFile.length);
 
-	    // 엑셀 파일을 응답으로 반환
+	    // 엑셀 파일과 함께 응답을 반환
 	    return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
 	}
-	    
-    
+
+
 
 ////////////////////////////상품 목록 페이지 끝////////////////////////////////
 
@@ -336,35 +352,26 @@ public class ProductRestController {
 
 	private static final String UPLOAD_DIR = "C:/uploads/summer"; // 업로드 폴더 경로
 
-	@PostMapping("/uploadImage")
-	public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
-		Map<String, String> response = new HashMap<>();
+	 @PostMapping("/uploadImage")
+	    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
+	        Map<String, String> response = new HashMap<>();
 
-		try {
-			// 업로드 디렉토리 경로
-			Path uploadPath = Paths.get(UPLOAD_DIR);
+	        try {
+	            // 파일 저장 경로 생성
+	            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+	            File saveFile = new File(UPLOAD_DIR, fileName);
+	            file.transferTo(saveFile); // 파일 저장
 
-			// 디렉토리가 존재하지 않으면 폴더 생성
-			if (!Files.exists(uploadPath)) {
-				Files.createDirectories(uploadPath); // 폴더 생성
-			}
+	            // 저장된 이미지의 URL 생성
+	            String fileUrl = "/uploads/summer/" + fileName;  // 클라이언트가 접근할 URL
+	            response.put("fileUrl", fileUrl);
 
-			// 파일 이름 설정 (UUID 사용 등)
-			String fileName = UUID.randomUUID().toString() + ".jpg";
-			Path filePath = uploadPath.resolve(fileName); // 파일 경로 생성
-
-			// 파일을 업로드 디렉토리에 저장
-			file.transferTo(filePath);
-
-			// 업로드된 파일의 URL 반환
-			response.put("fileUrl", "/uploads/" + fileName);
-
-			return ResponseEntity.ok(response);
-		} catch (IOException e) {
-			response.put("error", "파일 업로드 실패");
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-		}
-	}
+	            return ResponseEntity.ok(response);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+	        }
+	    }
 
 	//////////////////////////// 상품 등록 페이지 끝////////////////////////////////
 

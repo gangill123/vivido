@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -91,11 +92,11 @@ public class ProductDAOImpl implements ProductDAO {
 	public Map<String, Integer> getRentalCounts() {
 		return sqlSession.selectOne(NAMESPACE + ".getRentalCounts");
 	}
-	@Override
-	public List<ProductVO> getProductsByIds(List<String> productIds) {
-	    return sqlSession.selectList(NAMESPACE + ".getProductsByIds", productIds);
-
-	}
+	
+	 @Override
+	    public List<ProductVO> getProductsByIds(Map<String, Object> paramMap) {  // 여기서도 Map 사용
+	        return sqlSession.selectList(NAMESPACE + ".getProductsByIds", paramMap);
+	    }
 	
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////

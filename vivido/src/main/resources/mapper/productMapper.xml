@@ -14,8 +14,8 @@
 	
 	
 	<resultMap id="productResultMap" type="com.vivido.domain.ProductVO">
-	    <result property="productId" column="product_id" />
-	    <result property="thumbnailUrl" column="thumbnail_url" />
+		<result property="productId" column="product_id" />
+		<result property="thumbnailUrl" column="thumbnail_url" />
 	    <!-- 다른 필드들도 매핑 -->
 	</resultMap>
 
@@ -146,23 +146,32 @@
     AND p.product_category_details = #{productCategoryDetails}
     ORDER BY p.create_date DESC;
 </select>
-	 <!--렌탈 카운트-->
+	<!--렌탈 카운트-->
 	<select id="getRentalCounts" resultMap="rentalCountMap">
-	   SELECT 
-	       (SELECT COUNT(*) FROM products WHERE product_status = 1) AS rentedCount,   
-	       (SELECT COUNT(*) FROM products WHERE product_status = 0) AS availableCount, 
-	       (SELECT COUNT(*) FROM products) AS totalCount
-	   FROM DUAL
+		SELECT
+		(SELECT COUNT(*) FROM products WHERE product_status = 1) AS rentedCount,
+		(SELECT COUNT(*) FROM products WHERE product_status = 0) AS
+		availableCount,
+		(SELECT COUNT(*) FROM products) AS totalCount
+		FROM DUAL
 	</select>
-<!--엑셀-->
-    <select id="getProductsByIds" resultType="com.vivido.domain.ProductVO">
-        SELECT product_id, product_name, product_category, product_price, product_stock, create_date
-        FROM products
-        WHERE product_id IN
-        <foreach collection="list" item="productId" open="(" close=")" separator=",">
-            #{productId}
-        </foreach>
-    </select>
+
+	<!-- 엑셀용 상품 조회 -->
+	<select id="getProductsByIds" resultType="com.vivido.domain.ProductVO">
+		SELECT product_id, product_seller_id, product_category,
+		product_category_details, product_keyword, product_name, product_price,
+		start_date, end_date, discount_rate, product_stock, product_option_id,
+		product_content, brand, manufacturer, product_origin, product_status,
+		delivery_method, delivery_company, delivery_price, address, create_date,
+		update_date, approval_date, approval_id, comments FROM products <where>
+			<if test="productIds != null and productIds.size() > 0"> AND
+		product_id IN <foreach collection="productIds" item="productId" open="("
+					close=")" separator=",">
+					#{productId}
+				</foreach>
+			</if>
+		</where>
+	</select>
 
 	<!-- 상품 등록 -->
 	<insert id="insertProduct" parameterType="com.vivido.domain.ProductVO">

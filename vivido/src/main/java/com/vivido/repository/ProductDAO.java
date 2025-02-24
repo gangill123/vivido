@@ -31,7 +31,8 @@ public interface ProductDAO {
 
 	public Map<String, Integer> getRentalCounts();
 	
-    List<ProductVO> getProductsByIds(List<String> productIds);
+    List<ProductVO> getProductsByIds(Map<String, Object> paramMap);  // 기존 List<String> → Map<String, Object> 변경
+
 
 
     // 상품 등록
@@ -39,5 +40,7 @@ public interface ProductDAO {
 
     // 이미지 등록
     void insertProductImage(ProductVO productImage);
+
+	
 
 }

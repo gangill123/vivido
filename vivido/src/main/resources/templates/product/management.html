@@ -647,24 +647,31 @@
 				    }
 
 				    // 서버에 선택된 상품 ID를 전송하여 엑셀 파일을 생성하도록 요청
-				    $.ajax({
-				        url: "/management/products/exportProducts",  // 엑셀 생성 API
-				        type: "POST",
-				        contentType: "application/json",
-				        data: JSON.stringify({ productIds: selectedProductIds }), // 선택된 상품 ID 전송
-				        success: function(response) {
-				            // 응답으로 받은 엑셀 파일 처리
-				            var blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-				            var link = document.createElement('a');
-				            link.href = URL.createObjectURL(blob);
-				            link.download = "selected_products.xlsx";  // 다운로드할 파일 이름
-				            link.click();
-				        },
-				        error: function(xhr, status, error) {
-				            console.error("엑셀 다운로드 오류:", error);
-				            alert("엑셀 파일을 생성하는 데 실패했습니다.");
-				        }
-				    });
+					$.ajax({
+					    url: "/management/products/exportProducts",  // 엑셀 생성 API
+					    type: "POST",
+					    contentType: "application/json",
+					    data: JSON.stringify({ productIds: selectedProductIds }), // 선택된 상품 ID 전송
+					    xhrFields: {
+					        responseType: 'arraybuffer'  // 응답을 바이너리 형식으로 받기
+					    },
+					    success: function(response) {
+					        // 응답으로 받은 엑셀 파일 처리
+					        var blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+					        var link = document.createElement('a');
+					        link.href = URL.createObjectURL(blob);
+					        link.download = "products.xlsx";  // 다운로드할 파일 이름
+					        link.click();
+					    },
+					    error: function(xhr, status, error) {
+					        console.error("엑셀 다운로드 오류:", error);
+					        alert("엑셀 파일을 생성하는 데 실패했습니다.");
+					    }
+					});
+
+
+
+
 				}
 
 		</script>
