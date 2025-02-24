@@ -35,7 +35,9 @@ public interface ProductService {
 	public byte[] exportProductsToExcel(List<String> productIds);
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
-	 public void registerProduct(ProductVO productVO, List<ProductVO> productImages);
+	public void registerProduct(ProductVO productVO, List<ProductVO> productImages);
+
+	List<ProductVO> getProductsByIds(List<String> productIds);
 	
 	///////////////////////////////상품 등록 페이지 끝////////////////////////////////
 	

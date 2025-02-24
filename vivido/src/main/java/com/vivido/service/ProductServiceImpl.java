@@ -15,6 +15,7 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -136,68 +137,163 @@ public class ProductServiceImpl implements ProductService {
 	
 	@Override
 	public byte[] exportProductsToExcel(List<String> productIds) {
-	    List<ProductVO> products = productDAO.getProductsByIds(productIds);
+	    List<ProductVO> products = getProductsByIds(productIds);
 
-	    // 엑셀 생성
-	    try (Workbook workbook = new XSSFWorkbook(); // .xlsx 형식의 엑셀 파일을 생성
-	         ByteArrayOutputStream bos = new ByteArrayOutputStream()) {
+	    Workbook workbook = new XSSFWorkbook();
+	    ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
+	    try {
 	        Sheet sheet = workbook.createSheet("Products");
 
-	        // 헤더 작성
+	        // 헤더 스타일 추가
+	        CellStyle headerStyle = workbook.createCellStyle();
+	        Font headerFont = workbook.createFont();
+	        headerFont.setBold(true); // 글꼴을 굵게 설정
+	        headerFont.setFontHeightInPoints((short) 12); // 글꼴 크기 설정 (필요시)
+	        headerStyle.setFont(headerFont); // 스타일에 폰트를 적용
+
+	        // 헤더 생성
 	        Row headerRow = sheet.createRow(0);
-	        String[] headers = {"상품 ID", "상품명", "카테고리", "가격", "재고", "등록일"};
+	        String[] headers = {
+	            "상품 ID", "판매자 ID", "카테고리", "세분류", "키워드", "상품명", 
+	            "렌탈가", "렌탈 시작일", "렌탈 종료일", "할인율", "재고 수량", 
+	            "옵션", "상품 내용", "브랜드", "제조사", "원산지", 
+	            "상품 상태", "배송 방법", "택배사", "배송비", "출고지", 
+	            "등록일", "수정일", "승인일", "승인자 ID", "비고"
+	        };
+
 	        for (int i = 0; i < headers.length; i++) {
-	            headerRow.createCell(i).setCellValue(headers[i]);
+	            Cell cell = headerRow.createCell(i);
+	            cell.setCellValue(headers[i]);
+	            cell.setCellStyle(headerStyle); // 스타일 적용
 	        }
 
-	        // 날짜 셀 스타일 생성
+	        // 날짜 포맷 설정
 	        CellStyle dateCellStyle = workbook.createCellStyle();
 	        CreationHelper createHelper = workbook.getCreationHelper();
 	        dateCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("yyyy-MM-dd"));
 
-	        // 상품 데이터 작성
+	        // 숫자 셀 스타일 추가
+	        CellStyle numberCellStyle = workbook.createCellStyle();
+	        numberCellStyle.setDataFormat(createHelper.createDataFormat().getFormat("#,##0"));
+
 	        int rowNum = 1;
 	        for (ProductVO product : products) {
 	            Row row = sheet.createRow(rowNum++);
-	            row.createCell(0).setCellValue(product.getProductId());  // 상품 ID
-	            row.createCell(1).setCellValue(product.getProductName());  // 상품명
-	            row.createCell(2).setCellValue(product.getProductCategory());  // 카테고리
-	            row.createCell(3).setCellValue(product.getProductPrice());  // 가격
-	            row.createCell(4).setCellValue(product.getProductStock());  // 재고
 
-	            // 등록일을 날짜로 처리하여 셀에 설정
-	            if (product.getCreateDate() != null) {
-	                // LocalDate를 java.util.Date로 변환
-	                java.util.Date utilDate = Date.from(product.getCreateDate().atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-	                // 날짜 셀 생성
-	                Cell dateCell = row.createCell(5);
-	                dateCell.setCellValue(utilDate);  // 날짜 값 설정
-	                dateCell.setCellStyle(dateCellStyle);  // 날짜 셀 스타일 적용
+	            // 상품 ID
+	            row.createCell(0).setCellValue(product.getProductId() != null ? product.getProductId() : "N/A");
+	            // 판매자 ID
+	            row.createCell(1).setCellValue(product.getProductSellerId() != null ? product.getProductSellerId() : "N/A");
+	            // 카테고리
+	            row.createCell(2).setCellValue(product.getProductCategory() != null ? product.getProductCategory() : "정보 없음");
+	            // 세분류
+	            row.createCell(3).setCellValue(product.getProductCategoryDetails() != null ? product.getProductCategoryDetails() : "정보 없음");
+	            // 키워드
+	            row.createCell(4).setCellValue(product.getProductKeyword() != null ? product.getProductKeyword() : "정보 없음");
+	            // 상품명
+	            row.createCell(5).setCellValue(product.getProductName() != null ? product.getProductName() : "정보 없음");
+	            // 렌탈가
+	            Cell priceCell = row.createCell(6);
+	            priceCell.setCellValue(product.getProductPrice() != 0 ? product.getProductPrice() : 0);
+	            priceCell.setCellStyle(numberCellStyle); // 숫자 형식 스타일 적용
+	            // 렌탈 시작일자
+	            Cell startDateCell = row.createCell(7);
+	            if (product.getStartDate() != null) {
+	                startDateCell.setCellValue(new java.util.Date(product.getStartDate().getTime()));
+	                startDateCell.setCellStyle(dateCellStyle);
 	            } else {
-	                row.createCell(5).setCellValue("");  // 등록일이 null인 경우 빈 셀
+	                startDateCell.setCellValue("정보 없음");
 	            }
+	            // 렌탈 종료일자
+	            Cell endDateCell = row.createCell(8);
+	            if (product.getEndDate() != null) {
+	                endDateCell.setCellValue(new java.util.Date(product.getEndDate().getTime()));
+	                endDateCell.setCellStyle(dateCellStyle);
+	            } else {
+	                endDateCell.setCellValue("정보 없음");
+	            }
+	            // 할인율
+	            row.createCell(9).setCellValue(product.getDiscountRate());
+	            // 재고 수량
+	            Cell stockCell = row.createCell(10);
+	            stockCell.setCellValue(product.getProductStock());
+	            stockCell.setCellStyle(numberCellStyle); // 숫자 형식 스타일 적용
+	            // 옵션 (true/false)
+	            row.createCell(11).setCellValue(product.isProductOptionId() ? "옵션 있음" : "옵션 없음");
+	            // 상품 내용
+	            row.createCell(12).setCellValue(product.getProductContent() != null ? product.getProductContent() : "정보 없음");
+	            // 브랜드
+	            row.createCell(13).setCellValue(product.getBrand() != null ? product.getBrand() : "비비도");
+	            // 제조사
+	            row.createCell(14).setCellValue(product.getManufacturer() != null ? product.getManufacturer() : "비비도");
+	            // 원산지
+	            row.createCell(15).setCellValue(product.getProductOrigin() != null ? product.getProductOrigin() : "국내");
+	            // 상품 상태
+	            row.createCell(16).setCellValue(product.getProductStatus());
+	            // 배송 방법
+	            row.createCell(17).setCellValue(product.getDeliveryMethod() != null ? product.getDeliveryMethod() : "정보 없음");
+	            // 택배사
+	            row.createCell(18).setCellValue(product.getDeliveryCompany() != null ? product.getDeliveryCompany() : "정보 없음");
+	            // 배송비
+	            row.createCell(19).setCellValue(product.getDeliveryPrice());
+	            // 출고지
+	            row.createCell(20).setCellValue(product.getAddress() != null ? product.getAddress() : "정보 없음");
+	            // 등록일자
+	            if (product.getCreateDate() != null) {
+	                row.createCell(21).setCellValue(product.getCreateDate().toString());
+	            } else {
+	                row.createCell(21).setCellValue("Invalid Date");
+	            }
+	            // 수정일자
+	            if (product.getUpdateDate() != null) {
+	                row.createCell(22).setCellValue(product.getUpdateDate().toString());
+	            } else {
+	                row.createCell(22).setCellValue("Invalid Date");
+	            }
+	            // 승인일자
+	            if (product.getApprovalDate() != null) {
+	                row.createCell(23).setCellValue(new java.util.Date(product.getApprovalDate().getTime()));
+	                row.getCell(23).setCellStyle(dateCellStyle); // 날짜 형식 스타일 적용
+	            } else {
+	                row.createCell(23).setCellValue("정보 없음");
+	            }
+	            // 승인자 ID
+	            row.createCell(24).setCellValue(product.getApprovalId() != null ? product.getApprovalId() : "정보 없음");
+	            // 비고
+	            row.createCell(25).setCellValue(product.getComments() != null ? product.getComments() : "정보 없음");
 	        }
 
-	        // 엑셀 컬럼 자동 크기 조정
+	        // 컬럼 너비 자동 조정
 	        for (int i = 0; i < headers.length; i++) {
 	            sheet.autoSizeColumn(i);
 	        }
 
-	        // 엑셀 파일을 ByteArrayOutputStream에 작성
+	        // 엑셀 데이터를 바이트 배열로 반환
 	        workbook.write(bos);
-	        bos.flush();  // 버퍼를 플러시하여 데이터가 완전히 기록되도록 함
-
-
-	        return bos.toByteArray();  // 최종적으로 바이트 배열로 반환
+	        return bos.toByteArray();
 	    } catch (IOException e) {
 	        e.printStackTrace();
-	        return null;  // 오류 발생 시 null 반환
+	        return null;
+	    } finally {
+	        try {
+	            bos.close();
+	            workbook.close();
+	        } catch (IOException e) {
+	            e.printStackTrace();
+	        }
 	    }
 	}
 
 
+
+
+	  @Override
+	    public List<ProductVO> getProductsByIds(List<String> productIds) {
+	        Map<String, Object> paramMap = new HashMap<>();
+	        paramMap.put("productIds", productIds);
+	        return productDAO.getProductsByIds(paramMap);
+	    }
 
 
 
