@@ -47,6 +47,14 @@ public class ProductController {
 	    return "product/registration";
 	}
 	
+	@GetMapping("/update")
+	public String updatePage() {
+	    System.out.println("update page method is called");
+	    return "product/update";
+	}
+	
+	
+	
 
 	
 	

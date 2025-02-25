@@ -172,7 +172,8 @@
 		                        <th class="text-center">상품 이미지</th>
 		                        <th class="text-center">상품ID</th>
 		                        <th class="text-center">상품명</th>
-		                        <th class="text-center">가격</th>
+		                        <th class="text-center">렌탈가</th>
+		                        <th class="text-center">할인가</th>
 		                        <th class="text-center">카테고리</th>
 		                        <th class="text-center">카테고리 세분류</th>
 		                        <th class="text-center">키워드</th>
@@ -218,9 +219,14 @@
 	            </div>
 
 	            <div class="form-group">
-	                <label for="editPrice">가격:</label>
+	                <label for="editPrice">렌탈가:</label>
 	                <input type="number" id="editPrice">
 	            </div>
+				
+				<div class="form-group">
+				    <label for="editDiscountedPrice">할인가:</label>
+				    <input type="number" id="editDiscountedPrice">
+				</div>
 
 	            <div class="form-group">
 	                <label for="editCategory">카테고리:</label>
@@ -362,6 +368,7 @@
 			                        <td>${product.productId}</td>
 			                        <td>${product.productName}</td>
 			                        <td>${product.productPrice} 원</td>
+			                        <td>${product.discountedPrice} 원</td>
 			                        <td>${product.productCategory}</td>
 			                        <td>${product.productCategoryDetails}</td>
 			                        <td>${product.productKeyword}</td>
@@ -383,7 +390,7 @@
 			                        <td>${product.comments}</td>
 									
 			                        <td>
-			                            <button class="btn btn-warning btn-icon-split" onclick="editProduct('${product.productId}')">수정</button>
+										<button class="btn btn-warning btn-icon-split" onclick="editProduct('${product.productId}')">수정</button>
 			                        </td>
 			                        <td>
 			                            <button class="btn btn-danger btn-icon-split" onclick="deleteProduct('${product.productId}')">삭제</button>
@@ -464,91 +471,9 @@
 
 
 			// 상품 수정 함수 (추가 구현 필요)
-			// 수정 모달 열기
-			function openEditModal(productId) {
-			    // 상품 정보를 가져와서 모달에 입력
-			    fetch(`/management/products/${productId}`)
-			        .then(response => response.json())
-			        .then(product => {
-			            // 모달에 상품 정보 채우기
-			            document.getElementById("editProductId").value = product.productId;
-			            document.getElementById("editProductName").value = product.productName;
-			            document.getElementById("editPrice").value = product.productPrice;
-			            document.getElementById("editCategory").value = product.productCategory;
-			            document.getElementById("editCategoryDetails").value = product.productCategoryDetails;
-			            document.getElementById("editKeyword").value = product.productKeyword;
-			            document.getElementById("editStockQuantity").value = product.productStock;
-			            
-						
-						// 추가된 항목들 채우기
-						document.getElementById("editProductStatus").value = product.productStatus;
-				        document.getElementById("editDeliveryMethod").value = product.deliveryMethod;
-				        document.getElementById("editDeliveryCompany").value = product.deliveryCompany;
-				        document.getElementById("editBrand").value = product.brand;
-				        document.getElementById("editManufacturer").value = product.manufacturer;
-				        document.getElementById("editProductOrigin").value = product.productOrigin;
-				        document.getElementById("editComments").value = product.comments;
-
-						
-			            // 모달 창 띄우기
-			            document.getElementById("editModal").style.display = "block";
-			        })
-			        .catch(error => console.log("상품 정보 로드 실패:", error));
-			}
-			// 수정 모달 닫기
-			function closeModal() {
-			    document.getElementById("editModal").style.display = "none";
-			}
-
-			// 수정된 정보 저장
-			function saveEdit() {
-			    const productId = document.getElementById("editProductId").value;
-			    const updatedProduct = {
-			        productId: productId,
-			        productName: document.getElementById("editProductName").value,
-			        productPrice: document.getElementById("editPrice").value,
-			        productCategory: document.getElementById("editCategory").value,
-			        productCategoryDetails: document.getElementById("editCategoryDetails").value,
-			        productKeyword: document.getElementById("editKeyword").value,
-			        productStock: document.getElementById("editStockQuantity").value,
-			    	
-					
-					// 추가된 항목들
-					 productStatus: document.getElementById("editProductStatus").value,
-					 deliveryMethod: document.getElementById("editDeliveryMethod").value,
-					 deliveryCompany: document.getElementById("editDeliveryCompany").value,
-					 brand: document.getElementById("editBrand").value,
-					 manufacturer: document.getElementById("editManufacturer").value,
-					 productOrigin: document.getElementById("editProductOrigin").value,
-					 comments: document.getElementById("editComments").value
-			    };
-
-			    fetch(`/management/products/${productId}`, {
-			        method: 'PUT',
-			        headers: {
-			            'Content-Type': 'application/json'
-			        },
-			        body: JSON.stringify(updatedProduct)
-			    })
-			    .then(response => {
-			        if (response.ok) {
-			            alert("상품 수정 성공");
-			            closeModal();  // 모달 닫기
-			            // 수정된 상품 목록 갱신 (필요시)
-			            location.reload(); // 페이지 새로고침
-			        } else {
-			            alert("상품 수정 실패");
-			        }
-			    })
-			    .catch(error => {
-			        alert("수정 요청에 실패했습니다.");
-			        console.error("수정 실패:", error);
-			    });
-			}
-
-			// 상품 수정 버튼 클릭 시 호출
 			function editProduct(productId) {
-			    openEditModal(productId);
+			    // 수정 페이지로 이동 (productId를 URL 파라미터로 전달)
+			    window.location.href = `/product/update/${productId}`;
 			}
 			
 			
@@ -699,6 +624,7 @@
 		            resultHtml += '<td>' + product.productId + '</td>';
 		            resultHtml += '<td>' + product.productName + '</td>';
 		            resultHtml += '<td>' + product.productPrice + ' 원</td>';
+		            resultHtml += '<td>' + product.discountedPrice + ' 원</td>';
 		            resultHtml += '<td>' + product.productCategory + '</td>';
 		            resultHtml += '<td>' + product.productCategoryDetails + '</td>';
 		            resultHtml += '<td>' + product.productKeyword + '</td>';
@@ -837,6 +763,7 @@
 											<td>${product.productId}</td>
 					                        <td>${product.productName}</td>
 					                        <td>${product.productPrice} 원</td>
+					                        <td>${product.discountedPrice} 원</td>
 					                        <td>${product.productCategory}</td>
 					                        <td>${product.productCategoryDetails}</td>
 					                        <td>${product.productKeyword}</td>

@@ -28,7 +28,7 @@
 			    <!-- 상품 등록 카드 -->
 			    <div class="card shadow-lg rounded">
 			        <div class="card-header bg-primary text-white">
-			            <h2 class="h4 mb-0">상품 등록</h2>
+			            <h2 class="h4 mb-0">상품 수정</h2>
 			        </div>
 			        <div class="card-body">
 						<form onsubmit="event.preventDefault(); registerProduct();" id="productForm">
@@ -189,7 +189,7 @@
 			                    </table>
 			                </div>
 			                <div class="d-flex justify-content-end">
-			                    <button type="submit" class="btn btn-lg btn-success">등록</button>
+			                    <button type="submit" class="btn btn-lg btn-success">수정</button>
 			                </div>
 			            </form>
 			        </div>
@@ -297,205 +297,7 @@
 
 </script>
 
-	
-<script>
-		function previewImages() {
-		    const files = document.getElementById('productImages').files;
-		    const previewContainer = document.getElementById('imagePreviewContainer');
-		    const thumbnailSelect = document.getElementById('thumbnail');
-		    const thumbnailPreview = document.getElementById('thumbnailPreview');
-		    
-		    // 미리보기 컨테이너 초기화
-		    previewContainer.innerHTML = '';
-		    thumbnailSelect.innerHTML = '<option value="">썸네일 선택</option>'; // 썸네일 선택 목록 초기화
-		    thumbnailPreview.innerHTML = ''; // 썸네일 미리보기 초기화
-	
-		    if (files.length === 0) {
-		        return;
-		    }
-	
-		    // 선택된 이미지 파일들을 하나씩 미리보기
-		    for (let i = 0; i < files.length; i++) {
-		        const file = files[i];
-		        
-		        // 이미지 파일인지 확인
-		        if (file && file.type.startsWith('image/')) {
-		            const reader = new FileReader();
-		            
-		            reader.onload = function(event) {
-		                // 미리보기 이미지 생성
-		                const imgElement = document.createElement('img');
-		                imgElement.src = event.target.result;
-		                imgElement.classList.add('img-fluid', 'preview-image');
-		                imgElement.style.maxWidth = '150px'; // 크기 제한 (필요시 조정)
-		                imgElement.style.margin = '5px';
-		                
-		                previewContainer.appendChild(imgElement);
-		                
-		                // 썸네일 선택 목록 추가
-		                const option = document.createElement('option');
-		                option.value = event.target.result; // 이미지의 Data URL을 값으로 설정
-		                option.textContent = `Image ${i + 1}`;
-		                thumbnailSelect.appendChild(option);
-		            };
-		            
-		            // 파일을 읽어서 이미지를 미리보기
-		            reader.readAsDataURL(file);
-		        }
-		    }
-		}
-	
-		// 썸네일 선택 시 미리보기 업데이트
-		function updateThumbnailPreview() {
-		    const thumbnailSelect = document.getElementById('thumbnail');
-		    const thumbnailPreview = document.getElementById('thumbnailPreview');
-		    const selectedThumbnail = thumbnailSelect.value;
-	
-		    // 썸네일 미리보기 초기화
-		    thumbnailPreview.innerHTML = '';
-	
-		    if (selectedThumbnail) {
-		        const imgElement = document.createElement('img');
-		        imgElement.src = selectedThumbnail;
-		        imgElement.classList.add('img-fluid');
-		        imgElement.style.maxWidth = '150px'; // 썸네일 미리보기 크기
-		        imgElement.style.margin = '5px';
-		        
-		        thumbnailPreview.appendChild(imgElement);
-		    }
-		}
-		   
-		
-</script>
 
-
-	
-<script>
-	    // 카테고리에 따라 세분류 옵션을 업데이트하는 함수
-	    function updateSubCategory() {
-	        var category = document.getElementById("productCategory").value;
-	        var subCategorySelect = document.getElementById("productCategoryDetails");
-	        var subCategories = {
-	            electronics: ["휴대폰", "컴퓨터", "카메라"],
-	            clothing: ["상의", "하의", "아우터"],
-	            books: ["소설", "에세이", "자기계발"]
-	        };
-	
-	        // 세분류 박스를 초기화
-	        subCategorySelect.innerHTML = '<option value="">세분류 선택</option>';
-	
-	        if (category) {
-	            // 선택된 카테고리에 따라 세분류 항목을 추가
-	            subCategories[category].forEach(function(subCategory) {
-	                var option = document.createElement("option");
-	                option.value = subCategory.toLowerCase();
-	                option.text = subCategory;
-	                subCategorySelect.appendChild(option);
-	            });
-	            subCategorySelect.style.display = "block"; // 세분류 박스 보이기
-	        } else {
-	            subCategorySelect.style.display = "none"; // 카테고리가 선택되지 않으면 세분류 박스 숨기기
-	        }
-	    }
-</script>
-	
-<script>
-		document.addEventListener('DOMContentLoaded', function() {
-		    const today = new Date();
-		    const year = today.getFullYear();
-		    const month = String(today.getMonth() + 1).padStart(2, '0');
-		    const day = String(today.getDate()).padStart(2, '0');
-		    const formattedDate = `${year}-${month}-${day}`;
-		    
-		    document.getElementById('createDate').value = formattedDate;
-		});
-		
-</script>
-	  
-  
-<script>
-	function registerProduct() {
-	    const formData = new FormData();
-	    
-	    // 일반 상품 데이터
-	    formData.append('productId', document.getElementById('productId').value);
-	    formData.append('productCategory', document.getElementById('productCategory').value);
-	    formData.append('productCategoryDetails', document.getElementById('productCategoryDetails').value);
-	    formData.append('productKeyword', document.getElementById('productKeyword').value);
-	    formData.append('productName', document.getElementById('productName').value);
-	    formData.append('productPrice', document.getElementById('productPrice').value);
-	    formData.append('discountedPrice', document.getElementById('discountedPrice').value);
-	    formData.append('discountRate', document.getElementById('discountRate').value);
-	    formData.append('productStock', document.getElementById('productStock').value);
-
-		// 썸머노트에서 값 가져오기
-		formData.append('productContent', $jq('#productContent').summernote('code'));  // 변경된 부분
-		console.log('productContent:', productContent);  // 값 확인
-		
-		
-		// 배송 관련 정보 추가
-		formData.append('deliveryMethod', document.getElementById('deliveryMethod').value);
-		formData.append('deliveryCompany', document.getElementById('deliveryCompany').value);
-		formData.append('deliveryPrice', document.getElementById('deliveryPrice').value);
-		formData.append('address', document.getElementById('address').value);
-		
-	    formData.append('brand', document.getElementById('brand').value);
-	    formData.append('manufacturer', document.getElementById('manufacturer').value);
-	    formData.append('productOrigin', document.getElementById('productOrigin').value);
-	    formData.append('createDate', document.getElementById('createDate').value);
-	    formData.append('comments', document.getElementById('comments').value);
-
-	    // 이미지 파일 (다중 이미지)
-		const productImages = document.getElementById('productImages').files;
-		if (productImages.length > 0) {
-		    for (let i = 0; i < productImages.length; i++) {
-		        formData.append('productImages', productImages[i]);
-		    }
-		} else {
-		    console.error('이미지가 선택되지 않았습니다.');
-		}
-
-	    // 썸네일 선택
-	    const thumbnailSelect = document.getElementById('thumbnail');
-	    const selectedThumbnail = thumbnailSelect.value;
-	    formData.append('thumbnail', selectedThumbnail);
-
-	    // RESTful API 호출
-	    fetch('/management/products/register', {
-	        method: 'POST',
-	        body: formData,  // FormData를 직접 전송
-	    })
-	    .then(response => response.json())
-	    .then(data => {
-	        console.log('상품 등록 성공:', data);
-	        alert('상품이 등록되었습니다.');
-			// 폼 초기화
-			   document.getElementById('productForm').reset();  // productForm은 폼의 id입니다.
-	    })
-	    .catch(error => {
-	        console.error('상품 등록 실패:', error);
-	        alert('상품 등록에 실패했습니다.');
-	    });
-	}
-
-	// 이미지 파일 선택 후 썸네일 목록 동적으로 추가
-	document.getElementById('productImages').addEventListener('change', function() {
-	    const thumbnailSelect = document.getElementById('thumbnail');
-	    thumbnailSelect.innerHTML = '<option value="">썸네일 선택</option>'; // 초기화
-	    
-	    const files = this.files;
-	    for (let i = 0; i < files.length; i++) {
-	        const option = document.createElement('option');
-	        option.value = files[i].name; // 파일 이름을 썸네일 값으로 사용
-	        option.textContent = files[i].name; // 파일 이름을 옵션 텍스트로 사용
-	        thumbnailSelect.appendChild(option);
-	    }
-	});
-
-
-</script>
-	
-		 
 		 
 		 
 		 
