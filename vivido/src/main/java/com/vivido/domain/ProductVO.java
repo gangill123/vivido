@@ -48,6 +48,8 @@ public class ProductVO {
     private Timestamp approvalDate;  // 승인일자
     private String approvalId;  // 승인자 ID
     private String comments;  // 비고
+    private int discountedPrice; // 할인된 가격
+
     
 	
     private int imageId;

@@ -235,57 +235,84 @@ public class ProductRestController {
 //////////////////////////// 상품 등록 페이지 시작////////////////////////////////
 
 	@PostMapping("/register")
-	public ResponseEntity<Map<String, String>> registerProduct(@RequestParam("productId") String productId,
-			@RequestParam("productCategory") String productCategory,
-			@RequestParam("productCategoryDetails") String productCategoryDetails,
-			@RequestParam("productKeyword") String productKeyword, @RequestParam("productName") String productName,
-			@RequestParam("productPrice") int productPrice, @RequestParam("discountRate") int discountRate,
-			@RequestParam("productStock") int productStock, @RequestParam("productContent") String productContent,
-			@RequestParam("brand") String brand, @RequestParam("manufacturer") String manufacturer,
-			@RequestParam("productOrigin") String productOrigin, @RequestParam("createDate") String createDate,
-			@RequestParam("comments") String comments, @RequestParam("productImages") MultipartFile[] productImages) {
-		Map<String, String> response = new HashMap<>();
+	public ResponseEntity<Map<String, String>> registerProduct(
+	        @RequestParam("productId") String productId,
+	        @RequestParam("productCategory") String productCategory,
+	        @RequestParam("productCategoryDetails") String productCategoryDetails,
+	        @RequestParam("productKeyword") String productKeyword, 
+	        @RequestParam("productName") String productName,
+	        @RequestParam("productPrice") int productPrice, 
+	        @RequestParam("discountedPrice") int discountedPrice, 
+	        @RequestParam("discountRate") int discountRate,
+	        @RequestParam("productStock") int productStock, 
+	        @RequestParam("productContent") String productContent,
+	        @RequestParam("brand") String brand, 
+	        @RequestParam("manufacturer") String manufacturer,
+	        @RequestParam("productOrigin") String productOrigin, 
+	        @RequestParam("createDate") String createDate,
+	        @RequestParam("comments") String comments, 
+	        @RequestParam("productImages") MultipartFile[] productImages,
+	        @RequestParam("deliveryMethod") String deliveryMethod,
+	        @RequestParam("deliveryCompany") String deliveryCompany,
+	        @RequestParam("deliveryPrice") int deliveryPrice,
+	        @RequestParam("address") String address) {
+	    Map<String, String> response = new HashMap<>();
 
-		ProductVO productVO = new ProductVO();
-		productVO.setProductId(productId);
-		productVO.setProductCategory(productCategory);
-		productVO.setProductCategoryDetails(productCategoryDetails);
-		productVO.setProductKeyword(productKeyword);
-		productVO.setProductName(productName);
-		productVO.setProductPrice(productPrice);
-		productVO.setDiscountRate(discountRate);
-		productVO.setProductStock(productStock);
-		productVO.setProductContent(productContent);
-		productVO.setBrand(brand);
-		productVO.setManufacturer(manufacturer);
-		productVO.setProductOrigin(productOrigin);
-		productVO.setCreateDate(LocalDate.parse(createDate));
-		productVO.setComments(comments);
+	    ProductVO productVO = new ProductVO();
+	    productVO.setProductId(productId);
+	    productVO.setProductCategory(productCategory);
+	    productVO.setProductCategoryDetails(productCategoryDetails);
+	    productVO.setProductKeyword(productKeyword);
+	    productVO.setProductName(productName);
+	    productVO.setProductPrice(productPrice);
+	    productVO.setDiscountedPrice(discountedPrice);
+	    productVO.setDiscountRate(discountRate);
+	    productVO.setProductStock(productStock);
+	    productVO.setProductContent(productContent);
+	    productVO.setBrand(brand);
+	    productVO.setManufacturer(manufacturer);
+	    productVO.setProductOrigin(productOrigin);
+	    productVO.setCreateDate(LocalDate.parse(createDate));
+	    productVO.setComments(comments);
+
+	    // 배송 관련 정보 추가
+	    productVO.setDeliveryMethod(deliveryMethod);
+	    productVO.setDeliveryCompany(deliveryCompany);
+	    productVO.setDeliveryPrice(deliveryPrice);
+	    productVO.setAddress(address);
 		// 이미지 파일 저장 및 썸네일 생성
 		List<ProductVO> productImageList = new ArrayList<>();
 		if (productImages != null) {
-			for (MultipartFile imageFile : productImages) {
-				try {
-					// 이미지 파일 저장 (파일명만 반환됨)
-					String imageFileName = saveImage(imageFile);
+		    for (int i = 0; i < productImages.length; i++) {
+		        MultipartFile imageFile = productImages[i];
+		        try {
+		            // 이미지 파일 저장 (파일명만 반환됨)
+		            String imageFileName = saveImage(imageFile);
 
-					// 썸네일 생성 (파일명만 반환됨)
-					String thumbnailFileName = createThumbnail(imageFileName); // File 객체 대신 파일명 전달
+		            // 썸네일 파일 생성
+		            String thumbnailFileName = null;
+		            boolean isPrimary = false; // 기본적으로 썸네일이 아니도록 설정
 
-					// ProductVO에 이미지 정보 설정
-					ProductVO productImageVO = new ProductVO();
-					productImageVO.setProductId(productId);
-					productImageVO.setImageUrl(imageFileName); // 원본 파일명만 저장
-					productImageVO.setThumbnailUrl(thumbnailFileName); // 썸네일 파일명만 저장
-					productImageVO.setIsPrimary(false);
-					productImageVO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
-					productImageList.add(productImageVO);
-				} catch (IOException e) {
-					response.put("status", "error");
-					response.put("message", "이미지 처리 중 오류가 발생했습니다: " + e.getMessage());
-					return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
-				}
-			}
+		            // 첫 번째 이미지가 썸네일로 지정된 경우 (원하는 조건에 맞게 수정 가능)
+		            if (i == 0) {
+		                thumbnailFileName = createThumbnail(imageFileName); // 썸네일 파일 생성
+		                isPrimary = true; // 첫 번째 이미지는 썸네일로 설정
+		            }
+
+		            // ProductVO에 이미지 정보 설정
+		            ProductVO productImageVO = new ProductVO();
+		            productImageVO.setProductId(productId);
+		            productImageVO.setImageUrl(imageFileName); // 원본 파일명만 저장
+		            productImageVO.setThumbnailUrl(thumbnailFileName); // 썸네일 파일명 저장 (없으면 null)
+		            productImageVO.setIsPrimary(isPrimary); // 썸네일 여부 설정
+		            productImageVO.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+		            productImageList.add(productImageVO);
+		        } catch (IOException e) {
+		            response.put("status", "error");
+		            response.put("message", "이미지 처리 중 오류가 발생했습니다: " + e.getMessage());
+		            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		        }
+		    }
 		}
 
 		try {
