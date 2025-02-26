@@ -3,6 +3,8 @@ package com.vivido.repository;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.vivido.domain.ProductVO;
 
 public interface ProductDAO {
@@ -29,17 +31,20 @@ public interface ProductDAO {
 
 	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
 
-	public Map<String, Integer> getRentalCounts();
+	public Map<String, Integer> getDisplayCounts();
 	
     List<ProductVO> getProductsByIds(Map<String, Object> paramMap);  // 기존 List<String> → Map<String, Object> 변경
-
-
+    
 
     // 상품 등록
     void insertProduct(ProductVO productVO);
 
     // 이미지 등록
     void insertProductImage(ProductVO productImage);
+    // 이미지 업데이트 
+	void updateProductImages(ProductVO product);
+
+	public void updateProductStatus(String productId, int status);
 
 	
 

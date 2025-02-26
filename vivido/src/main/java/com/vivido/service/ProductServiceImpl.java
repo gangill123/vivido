@@ -12,16 +12,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.vivido.domain.ProductVO;
 import com.vivido.repository.ProductDAO;
@@ -58,10 +62,16 @@ public class ProductServiceImpl implements ProductService {
 		return productDAO.getProductById(productId);
 	}
 
-	@Override
-	public int updateProduct(ProductVO product) {
-		return productDAO.updateProduct(product);
-	}
+	
+    @Override
+    public void updateProduct(ProductVO product) {
+        productDAO.updateProduct(product);
+        
+        // 이미지 URL이 존재하면 업데이트 실행
+        if (product.getImageUrl() != null || product.getThumbnailUrl() != null) {
+            productDAO.updateProductImages(product);
+        }
+    }
 
 	// 상품 목록 페이징 처리
 
@@ -131,8 +141,8 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	@Override
-	public Map<String, Integer> getRentalCounts() {
-		return productDAO.getRentalCounts();
+	public Map<String, Integer> getDisplayCounts() {
+		return productDAO.getDisplayCounts();
 	}
 	
 	@Override
@@ -267,6 +277,10 @@ public class ProductServiceImpl implements ProductService {
 	        // 컬럼 너비 자동 조정
 	        for (int i = 0; i < headers.length; i++) {
 	            sheet.autoSizeColumn(i);
+
+	            // 추가적으로 각 열의 너비를 약간 넓혀서 보기 좋게 만들기
+	            int columnWidth = sheet.getColumnWidth(i);
+	            sheet.setColumnWidth(i, columnWidth + 1024); // 자동 너비에 여유를 더함
 	        }
 
 	        // 엑셀 데이터를 바이트 배열로 반환
@@ -288,13 +302,23 @@ public class ProductServiceImpl implements ProductService {
 
 
 
+
+
 	  @Override
 	    public List<ProductVO> getProductsByIds(List<String> productIds) {
 	        Map<String, Object> paramMap = new HashMap<>();
 	        paramMap.put("productIds", productIds);
 	        return productDAO.getProductsByIds(paramMap);
 	    }
-
+	
+	  
+	  
+	  @Override
+	  public void changeProductStatus(List<String> productIds, int status) {
+	        for (String productId : productIds) {
+	            productDAO.updateProductStatus(productId, status);
+	        }
+	    }
 
 
 

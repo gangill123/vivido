@@ -68,12 +68,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.vivido.domain.ChangeStatusRequest;
 import com.vivido.domain.ProductVO;
 import com.vivido.service.ProductService;
-
-
-
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
@@ -132,24 +130,105 @@ public class ProductRestController {
 		return ResponseEntity.ok(product);
 	}
 
-	// 상품 수정 API
-	@PutMapping("/{productId}")
-	public ResponseEntity<String> updateProduct(@PathVariable String productId, @RequestBody ProductVO product) {
+	@PostMapping("/update")
+	public ResponseEntity<Map<String, String>> updateProduct(
+	        @RequestParam("productId") String productId,
+	        @RequestParam("productCategory") String productCategory,
+	        @RequestParam("productCategoryDetails") String productCategoryDetails,
+	        @RequestParam("productKeyword") String productKeyword,
+	        @RequestParam("productName") String productName,
+	        @RequestParam("productPrice") int productPrice,
+	        @RequestParam("discountedPrice") int discountedPrice,
+	        @RequestParam("discountRate") int discountRate,
+	        @RequestParam("productStock") int productStock,
+	        @RequestParam("productContent") String productContent,
+	        @RequestParam("brand") String brand,
+	        @RequestParam("manufacturer") String manufacturer,
+	        @RequestParam("productOrigin") String productOrigin,
+	        @RequestParam("createDate") String createDate,
+	        @RequestParam("comments") String comments,
+	        @RequestParam(value = "productImages", required = false) MultipartFile[] productImages,
+	        @RequestParam("deliveryMethod") String deliveryMethod,
+	        @RequestParam("deliveryCompany") String deliveryCompany,
+	        @RequestParam(value = "discountedPrice", defaultValue = "0") int deliveryPrice,
+	        @RequestParam("address") String address) {
+	    
+	    Map<String, String> response = new HashMap<>();
 
-		// productId를 @RequestBody에서 전달된 값에 덮어씌우는 방식
-		product.setProductId(productId);
+	    // 기존 상품 정보 조회
+	    ProductVO existingProduct = productService.getProductById(productId);
+	    if (existingProduct == null) {
+	        response.put("status", "error");
+	        response.put("message", "상품이 존재하지 않습니다.");
+	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+	    }
 
-		// 상품 수정 수행
-		int result = productService.updateProduct(product);
+	    // 새로운 값으로 업데이트
+	    existingProduct.setProductCategory(productCategory);
+	    existingProduct.setProductCategoryDetails(productCategoryDetails);
+	    existingProduct.setProductKeyword(productKeyword);
+	    existingProduct.setProductName(productName);
+	    existingProduct.setProductPrice(productPrice);
+	    existingProduct.setDiscountedPrice(discountedPrice);
+	    existingProduct.setDiscountRate(discountRate);
+	    existingProduct.setProductStock(productStock);
+	    existingProduct.setProductContent(productContent);
+	    existingProduct.setBrand(brand);
+	    existingProduct.setManufacturer(manufacturer);
+	    existingProduct.setProductOrigin(productOrigin);
+	    existingProduct.setCreateDate(LocalDate.parse(createDate));
+	    existingProduct.setComments(comments);
+	    existingProduct.setDeliveryMethod(deliveryMethod);
+	    existingProduct.setDeliveryCompany(deliveryCompany);
+	    existingProduct.setDeliveryPrice(deliveryPrice);
+	    existingProduct.setAddress(address);
 
-		// 상품 수정이 성공한 경우
-		if (result > 0) {
-			return ResponseEntity.ok("상품 수정 성공");
-		} else {
-			// 수정 실패 시 좀 더 구체적인 실패 이유 제공 (선택 사항)
-			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("상품 수정 실패");
-		}
+	    // 이미지 파일 저장 및 업데이트
+	    if (productImages != null && productImages.length > 0) {
+	        List<String> imageUrls = new ArrayList<>();
+	        String thumbnailUrl = null;
+
+	        for (int i = 0; i < productImages.length; i++) {
+	            MultipartFile imageFile = productImages[i];
+	            try {
+	                // 이미지 파일 저장
+	                String imageFileName = saveImage(imageFile);
+	                imageUrls.add(imageFileName);
+
+	                // 첫 번째 이미지를 썸네일로 지정
+	                if (i == 0) {
+	                    thumbnailUrl = createThumbnail(imageFileName);
+	                }
+	            } catch (IOException e) {
+	                response.put("status", "error");
+	                response.put("message", "이미지 처리 중 오류 발생: " + e.getMessage());
+	                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	            }
+	        }
+
+	        // 기존 이미지 정보 갱신
+	        existingProduct.setImageUrl(String.join(",", imageUrls)); // 여러 개의 이미지를 ,로 구분하여 저장
+	        existingProduct.setThumbnailUrl(thumbnailUrl);
+	    }
+
+	    // 상품 업데이트 실행
+	    try {
+	        productService.updateProduct(existingProduct);
+	        response.put("status", "success");
+	        response.put("message", "상품 정보가 성공적으로 업데이트되었습니다.");
+	        return ResponseEntity.ok(response);
+	    } catch (Exception e) {
+	        response.put("status", "error");
+	        response.put("message", "상품 업데이트 실패: " + e.getMessage());
+	        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+	    }
 	}
+
+
+
+
+
+
 
 	@GetMapping("/search")
 	public ResponseEntity<List<ProductVO>> searchProducts(
@@ -197,9 +276,9 @@ public class ProductRestController {
 	}
 
 	// 렌탈 상태 데이터 반환
-	@GetMapping("/rentalStatus")
-	public Map<String, Integer> getRentalStatus() {
-		return productService.getRentalCounts();
+	@GetMapping("/displayStatus")
+	public Map<String, Integer> getDisplayStatus() {
+		return productService.getDisplayCounts();
 	}
 	
 	@PostMapping("/exportProducts")
@@ -227,7 +306,15 @@ public class ProductRestController {
 	    // 엑셀 파일과 함께 응답을 반환
 	    return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
 	}
+	
+	 @PostMapping("/changeStatus")
+	    public ResponseEntity<String> changeStatus(@RequestBody ChangeStatusRequest request) {
+	        productService.changeProductStatus(request.getProductIds(), request.getStatus());
+	        return ResponseEntity.ok("상품 상태가 변경되었습니다.");
+	    }
 
+
+	
 
 
 ////////////////////////////상품 목록 페이지 끝////////////////////////////////
