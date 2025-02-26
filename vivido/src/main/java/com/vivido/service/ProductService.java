@@ -18,7 +18,7 @@ public interface ProductService {
 	
 	public ProductVO getProductById(String productId);
 
-    public int updateProduct(ProductVO product);
+    public void updateProduct(ProductVO product);
     
     public Map<String, Object> getProducts(int pageNum, int pageSize);
     
@@ -30,14 +30,20 @@ public interface ProductService {
 
 	public List<ProductVO> getProductsByCategoryAndSubcategory(String productCategory, String productCategoryDetails);
 	
-	Map<String, Integer> getRentalCounts();
+	Map<String, Integer> getDisplayCounts();
 	
 	public byte[] exportProductsToExcel(List<String> productIds);
+	  
+	 public void changeProductStatus(List<String> productIds, int status);
+	
+	
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	public void registerProduct(ProductVO productVO, List<ProductVO> productImages);
 
 	List<ProductVO> getProductsByIds(List<String> productIds);
+
+	
 	
 	///////////////////////////////상품 등록 페이지 끝////////////////////////////////
 	

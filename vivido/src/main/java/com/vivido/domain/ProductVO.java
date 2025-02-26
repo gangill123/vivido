@@ -3,6 +3,7 @@ package com.vivido.domain;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -59,11 +60,12 @@ public class ProductVO {
     private Timestamp createdAt;
     
     
-    
-    
-    public void setIsPrimary(boolean isPrimary) {
-        this.isPrimary = isPrimary;
-    }
+   // 1) AS displayCount,    <!-- 진열 중인 물품 -->
+   // 0) AS ndisplayCount,   <!-- 미진열 물품 -->
+   // 2) AS outOfStockCount,  <!-- 품절 물품 -->
+   // 3) AS discontinuedCount,<!-- 판매 중지 물품 -->
+
+
     // getter and setter
     public String getThumbnailUrl() {
         return thumbnailUrl;
@@ -71,6 +73,15 @@ public class ProductVO {
 
     public void setThumbnailUrl(String thumbnailUrl) {
         this.thumbnailUrl = thumbnailUrl;
+    }
+    // Getter
+    public boolean IsPrimary() {
+        return isPrimary;
+    }
+
+    // Setter
+    public void setIsPrimary(boolean isPrimary) {
+        this.isPrimary = isPrimary;
     }
     
     

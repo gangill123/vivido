@@ -66,7 +66,7 @@
 						                <tr><th colspan="2" class="bg-light text-center">💰 가격 및 재고 정보</th></tr>
 										<!-- 가격 -->
 										<tr>
-										    <th scope="row" class="align-middle">판매가</th>
+										    <th scope="row" class="align-middle">렌탈가</th>
 										    <td>
 										        <input type="number" class="form-control form-control-sm" id="productPrice" placeholder="가격 입력" oninput="calculateDiscount()" required>
 										    </td>
@@ -115,6 +115,7 @@
 										
 										
 										
+										
 										<!-- 배송 관련 정보 추가 -->
 										<tr><th colspan="2" class="bg-light text-center">📦 배송 정보</th></tr>
 										<tr>
@@ -146,7 +147,7 @@
 						                </tr>
 						                <tr>
 						                    <th scope="row" class="align-middle">비고 입력</th>
-						                    <td><input type="text" class="form-control form-control-sm" id="comments" placeholder="상품 내용 입력"></td>
+						                    <td><input type="text" class="form-control form-control-sm" id="comments" placeholder="상품 비고 입력"></td>
 						                </tr>
 			
 			
@@ -174,15 +175,14 @@
 									<tr>
 									    <th scope="row" class="align-middle">썸네일 선택</th>
 									    <td>
-									        <select class="form-control form-control-sm" id="thumbnail" onchange="updateThumbnailPreview()">
-									            <option value="">썸네일 선택</option>
-									            <!-- 썸네일 목록은 자바스크립트로 동적으로 채워질 예정 -->
-									        </select>
+									        <!-- 파일 입력 요소로 수정 -->
+									        <input type="file" class="form-control form-control-sm no-border" id="thumbnail" onchange="updateThumbnailPreview()">
 									        <div id="thumbnailPreview" class="mt-3">
 									            <!-- 썸네일 미리보기 이미지 -->
 									        </div>
 									    </td>
 									</tr>
+
 										
 										
 			                        </tbody>
@@ -298,8 +298,175 @@
 </script>
 
 
-		 
-		 
+<script>
+    window.onload = function() {
+        const params = new URLSearchParams(window.location.search);
+
+        // ID 값이 있는 요소만 업데이트하도록 수정
+        const fields = ["productId", "productName", "productPrice", "productStock", 
+                        "productKeyword", "brand", "manufacturer", "productOrigin",
+                        "deliveryMethod", "deliveryCompany", "deliveryPrice", "address",
+                        "productContent", "comments", "createDate"];
+
+        fields.forEach(field => {
+            const element = document.getElementById(field);
+            if (element) {
+                const value = params.get(field);
+                if (value !== null) {
+                    element.value = value;
+                }
+            }
+        });
+    };
+	
+	
+	// 카테고리 
+	function updateSubCategory() {
+	    const categoryDetails = document.getElementById("productCategoryDetails");
+	    const category = document.getElementById("productCategory").value;
+
+	    // 기존 옵션 초기화
+	    categoryDetails.innerHTML = '<option value="">세분류 선택</option>';
+
+	    let subCategories = [];
+	    if (category === "electronics") {
+	        subCategories = ["스마트폰", "노트북", "태블릿", "TV"];
+	    } else if (category === "clothing") {
+	        subCategories = ["남성 의류", "여성 의류", "아동 의류"];
+	    } else if (category === "books") {
+	        subCategories = ["소설", "자기계발", "만화", "잡지"];
+	    }
+
+	    subCategories.forEach(sub => {
+	        const option = document.createElement("option");
+	        option.value = sub;
+	        option.textContent = sub;
+	        categoryDetails.appendChild(option);
+	    });
+
+	    categoryDetails.style.display = subCategories.length > 0 ? "block" : "none";
+	}
+	
+
+	
+	
+	function previewImages() {
+	    const fileInput = document.getElementById("productImages");
+	    const previewContainer = document.getElementById("imagePreviewContainer");
+	    const thumbnailSelect = document.getElementById("thumbnail");
+
+	    // 기존 미리보기 삭제
+	    previewContainer.innerHTML = "";
+	    thumbnailSelect.innerHTML = '<option value="">썸네일 선택</option>';
+
+	    Array.from(fileInput.files).forEach((file, index) => {
+	        const reader = new FileReader();
+	        reader.onload = function (e) {
+	            // 이미지 미리보기 추가
+	            const imgElement = document.createElement("img");
+	            imgElement.src = e.target.result;
+	            imgElement.classList.add("img-thumbnail", "m-2");
+	            imgElement.style.width = "100px";
+	            previewContainer.appendChild(imgElement);
+
+	            // 썸네일 선택 옵션 추가
+	            const option = document.createElement("option");
+	            option.value = e.target.result;
+	            option.textContent = `이미지 ${index + 1}`;
+	            thumbnailSelect.appendChild(option);
+	        };
+	        reader.readAsDataURL(file);
+	    });
+	}
+	
+	function updateThumbnailPreview() {
+	    const fileInput = document.getElementById("thumbnail");
+	    const previewDiv = document.getElementById("thumbnailPreview");
+
+	    // 미리보기 영역 초기화
+	    previewDiv.innerHTML = "";
+
+	    const file = fileInput.files[0];
+	    if (file) {
+	        const reader = new FileReader();
+	        
+	        // 파일이 로드되면 미리보기 이미지 표시
+	        reader.onload = function(e) {
+	            const img = document.createElement("img");
+	            img.src = e.target.result;
+	            
+	            // 썸네일 크기 조정 (예: 최대 크기를 200px로 설정)
+	            img.style.maxWidth = "150px";
+	            img.style.maxHeight = "150px"; // 높이도 제한
+	            img.style.objectFit = "contain"; // 이미지 비율을 유지하면서 크기 맞추기
+
+	            previewDiv.appendChild(img);
+	        };
+
+	        // 파일 읽기 시작
+	        reader.readAsDataURL(file);
+	    } else {
+	        previewDiv.innerHTML = "썸네일을 선택하세요.";
+	    }
+	}
+
+</script>
+
+<script>
+	function registerProduct() {
+	    const formData = new FormData();
+
+	    // 폼 필드 추가
+	    formData.append("productId", document.getElementById("productId").value);
+	    formData.append("productCategory", document.getElementById("productCategory").value);
+	    formData.append("productCategoryDetails", document.getElementById("productCategoryDetails").value);
+	    formData.append("productName", document.getElementById("productName").value);
+	    formData.append("productPrice", document.getElementById("productPrice").value);
+	    formData.append("discountRate", document.getElementById("discountRate").value);
+	    formData.append("discountedPrice", document.getElementById("discountedPrice").value);
+	    formData.append("productStock", document.getElementById("productStock").value);
+	    formData.append("productKeyword", document.getElementById("productKeyword").value);
+	    formData.append("brand", document.getElementById("brand").value);
+	    formData.append("manufacturer", document.getElementById("manufacturer").value);
+	    formData.append("productOrigin", document.getElementById("productOrigin").value);
+	    formData.append("deliveryMethod", document.getElementById("deliveryMethod").value);
+	    formData.append("deliveryCompany", document.getElementById("deliveryCompany").value);
+	    formData.append("deliveryPrice", document.getElementById("deliveryPrice").value);
+	    formData.append("address", document.getElementById("address").value);
+	    formData.append("productContent", document.getElementById("productContent").value);
+	    formData.append("comments", document.getElementById("comments").value);
+	    formData.append("createDate", document.getElementById("createDate").value);
+
+	    // 이미지 파일들 추가 (파일이 선택되었을 경우)
+	    const productImages = document.getElementById("productImages").files;
+	    for (let i = 0; i < productImages.length; i++) {
+	        formData.append("productImages", productImages[i]);
+	    }
+
+	    // 썸네일 이미지 추가 (파일이 선택되었을 경우)
+	    const thumbnailFile = document.getElementById("thumbnail").files[0];
+	    if (thumbnailFile) {
+	        formData.append("thumbnail", thumbnailFile);
+	    }
+
+	    // 서버로 전송 (AJAX 요청)
+	    fetch('management/products/update', {
+	        method: 'POST',
+	        body: formData // FormData 객체를 사용하여 전송
+	    })
+	    .then(response => response.json())
+	    .then(data => {
+	        if (data.status === "success") {
+	            alert("상품 수정 완료!");
+	        } else {
+	            alert("상품 수정 실패: " + data.message);
+	        }
+	    })
+	    .catch(error => console.error('Error:', error));
+	}
+
+
+</script>
 		 
 
 

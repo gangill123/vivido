@@ -51,7 +51,14 @@ public class ProductDAOImpl implements ProductDAO {
 	public int updateProduct(ProductVO product) {
 		return sqlSession.update(NAMESPACE + ".updateProduct", product);
 	}
-
+    @Override
+    public void updateProductImages(ProductVO product) {
+        sqlSession.update(NAMESPACE + ".updateProductImages", product);
+    }
+	
+	
+	
+	
 	@Override
 	public List<ProductVO> selectProducts(int offset, int pageSize) {
 		// OFFSET과 LIMIT을 사용하여 페이징 처리된 데이터 조회
@@ -89,14 +96,27 @@ public class ProductDAOImpl implements ProductDAO {
 	}
 	
 	@Override
-	public Map<String, Integer> getRentalCounts() {
-		return sqlSession.selectOne(NAMESPACE + ".getRentalCounts");
+	public Map<String, Integer> getDisplayCounts() {
+		return sqlSession.selectOne(NAMESPACE + ".getDisplayCounts");
 	}
 	
 	 @Override
 	    public List<ProductVO> getProductsByIds(Map<String, Object> paramMap) {  // 여기서도 Map 사용
 	        return sqlSession.selectList(NAMESPACE + ".getProductsByIds", paramMap);
 	    }
+	 
+	 @Override
+	 public void updateProductStatus(String productId, int status) {
+	     // 파라미터를 Map에 담아서 SQL 쿼리 호출
+	     Map<String, Object> paramMap = new HashMap<>();
+	     paramMap.put("productId", productId);
+	     paramMap.put("status", status);
+
+	     // MyBatis에서 SQL 쿼리를 실행하여 상품 상태를 변경
+	     sqlSession.update(NAMESPACE + ".updateProductStatus", paramMap);
+	 }
+
+	 
 	
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
