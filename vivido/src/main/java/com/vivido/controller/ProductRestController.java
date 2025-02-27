@@ -3,6 +3,7 @@ package com.vivido.controller;
 
 
 import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ContentDisposition;
@@ -38,9 +39,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -69,12 +73,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.vivido.domain.ChangeStatusRequest;
+import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
 import com.vivido.service.ProductService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 
+import com.vivido.domain.OptionType;
 
 import ch.qos.logback.core.model.Model;
 import jakarta.servlet.http.HttpServletResponse;
@@ -320,7 +326,23 @@ public class ProductRestController {
 ////////////////////////////상품 목록 페이지 끝////////////////////////////////
 
 //////////////////////////// 상품 등록 페이지 시작////////////////////////////////
-
+	 
+	 private void parseOptions(List<ProductOptionVO> options, List<String> optionList, String productId, OptionType optionType) {
+		    for (String option : optionList) {
+		        try {
+		            String[] data = option.split(" - ");
+		            if (data.length == 3) {
+		                String name = data[0];
+		                int status = "진열".equals(data[1]) ? 1 : 0;
+		                int price = Integer.parseInt(data[2].replace("원", "").trim());
+		                options.add(new ProductOptionVO(0, productId, optionType, name, status, price));
+		            }
+		        } catch (Exception e) {
+		            System.out.println("옵션 데이터 파싱 실패: " + option);
+		        }
+		    }
+		}
+	 
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> registerProduct(
 	        @RequestParam("productId") String productId,
@@ -338,11 +360,19 @@ public class ProductRestController {
 	        @RequestParam("productOrigin") String productOrigin, 
 	        @RequestParam("createDate") String createDate,
 	        @RequestParam("comments") String comments, 
-	        @RequestParam("productImages") MultipartFile[] productImages,
+	        @RequestParam(value = "productImages", required = false) MultipartFile[] productImages,
 	        @RequestParam("deliveryMethod") String deliveryMethod,
 	        @RequestParam("deliveryCompany") String deliveryCompany,
 	        @RequestParam("deliveryPrice") int deliveryPrice,
-	        @RequestParam("address") String address) {
+	        @RequestParam("address") String address,
+	        @RequestParam(value = "productColor", required = false) String productColor,
+	        @RequestParam(value = "productSize", required = false) String productSize,
+	        @RequestParam(value = "additionalProduct", required = false) String additionalProduct,
+
+	        @RequestParam(value = "optionValues", required = false) String[] optionValues
+
+	        
+	) {
 	    Map<String, String> response = new HashMap<>();
 
 	    ProductVO productVO = new ProductVO();
@@ -367,6 +397,66 @@ public class ProductRestController {
 	    productVO.setDeliveryCompany(deliveryCompany);
 	    productVO.setDeliveryPrice(deliveryPrice);
 	    productVO.setAddress(address);
+	    
+	    
+	    // 색상, 사이즈, 추가 상품 옵션 리스트 초기화
+        List<String> colorList = productColor != null ? Arrays.asList(productColor.split("\\|")) : new ArrayList<>();
+        List<String> sizeList = productSize != null ? Arrays.asList(productSize.split("\\|")) : new ArrayList<>();
+        List<String> additionalList = additionalProduct != null ? Arrays.asList(additionalProduct.split("\\|")) : new ArrayList<>();
+
+        // 옵션 정보 추가
+        List<ProductOptionVO> productOptions = new ArrayList<>();
+     // 색상 옵션 추가 전
+        for (String color : colorList) {
+            String[] data = color.trim().split(" - ");
+            if (data.length < 3) continue;
+            try {
+                String name = data[0].trim();
+                int status = "진열".equals(data[1].trim()) ? 1 : 0;
+                int price = Integer.parseInt(data[2].trim().replace("원", "").replace(",", ""));
+                productOptions.add(new ProductOptionVO(0, productId, OptionType.COLOR, name, price, status));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid price format for color: " + color);
+            }
+        }
+
+        for (String size : sizeList) {
+            String[] data = size.trim().split(" - ");
+            if (data.length < 3) continue;
+            try {
+                String name = data[0].trim();
+                int status = "진열".equals(data[1].trim()) ? 1 : 0;
+                int price = Integer.parseInt(data[2].trim().replace("원", "").replace(",", ""));
+                productOptions.add(new ProductOptionVO(0, productId, OptionType.SIZE, name, price, status));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid price format for size: " + size);
+            }
+        }
+
+        for (String additional : additionalList) {
+            String[] data = additional.trim().split(" - ");
+            if (data.length < 3) continue;
+            try {
+                String name = data[0].trim();
+                int status = "진열".equals(data[1].trim()) ? 1 : 0;
+                int price = Integer.parseInt(data[2].trim().replace("원", "").replace(",", ""));
+                productOptions.add(new ProductOptionVO(0, productId, OptionType.ADDITIONAL, name, price, status));
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid price format for additional product: " + additional);
+            }
+        }
+
+        // 중복 제거 후 추가
+        Set<String> uniqueOptions = new HashSet<>();
+        if (optionValues != null) {
+            for (String optionValue : optionValues) {
+                if (uniqueOptions.add(optionValue.trim())) {
+                    productOptions.add(new ProductOptionVO(0, productId, OptionType.ADDITIONAL, optionValue.trim(), 0, 1));
+                }
+            }
+        }
+
+
 		// 이미지 파일 저장 및 썸네일 생성
 		List<ProductVO> productImageList = new ArrayList<>();
 		if (productImages != null) {
@@ -404,7 +494,7 @@ public class ProductRestController {
 
 		try {
 			// 서비스로 상품과 이미지 등록
-			productService.registerProduct(productVO, productImageList);
+			productService.registerProduct(productVO, productImageList, productOptions);
 			response.put("status", "success");
 			response.put("message", "상품 등록 성공");
 			return ResponseEntity.ok(response);

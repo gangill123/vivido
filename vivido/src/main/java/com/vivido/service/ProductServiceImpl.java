@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
 import com.vivido.repository.ProductDAO;
 
@@ -319,6 +320,8 @@ public class ProductServiceImpl implements ProductService {
 	            productDAO.updateProductStatus(productId, status);
 	        }
 	    }
+	  
+	  
 
 
 
@@ -330,7 +333,7 @@ public class ProductServiceImpl implements ProductService {
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	 // 상품 등록
 	@Override
-	   public void registerProduct(ProductVO productVO, List<ProductVO> productImages) {
+	   public void registerProduct(ProductVO productVO, List<ProductVO> productImages, List<ProductOptionVO> productOptions) {
         // 상품 등록
         productDAO.insertProduct(productVO);
 
@@ -338,6 +341,13 @@ public class ProductServiceImpl implements ProductService {
         for (ProductVO productImage : productImages) {
             productDAO.insertProductImage(productImage);
         }
+        // 2. 옵션 정보 저장 (옵션이 있는 경우)
+        if (productOptions != null && !productOptions.isEmpty()) {
+            for (ProductOptionVO option : productOptions) {
+                productDAO.insertProductOption(option);
+            }
+        }
+        
     
     }
 	

@@ -3,6 +3,7 @@ package com.vivido.service;
 import java.util.List;
 import java.util.Map;
 
+import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -39,7 +40,7 @@ public interface ProductService {
 	
 	
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
-	public void registerProduct(ProductVO productVO, List<ProductVO> productImages);
+	public void registerProduct(ProductVO productVO, List<ProductVO> productImages, List<ProductOptionVO> productOptions);
 
 	List<ProductVO> getProductsByIds(List<String> productIds);
 

@@ -135,6 +135,61 @@
 										</tr>
 										
 										
+										<!-- 상품 옵션 -->
+										<tr><th colspan="2" class="bg-light text-center">🎨 상품 옵션</th></tr>
+
+										<!-- 색상 옵션 -->
+										<tr>
+										    <th scope="row" class="align-middle">색상 선택</th>
+										    <td>
+										        <input type="text" class="form-control form-control-sm" id="productColor" placeholder="색상 입력">
+										        <select class="form-control form-control-sm" id="productColorStatus">
+										            <option value="0">미진열</option>
+										            <option value="1">진열</option>
+										        </select>
+										        <input type="number" class="form-control form-control-sm" id="productColorPrice" placeholder="가격 입력">
+										        <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addOption('color')">추가</button>
+										        <ul id="colorList"></ul>
+										    </td>
+										</tr>
+
+										<!-- 사이즈 옵션 -->
+										<tr>
+										    <th scope="row" class="align-middle">사이즈 선택</th>
+										    <td>
+										        <input type="text" class="form-control form-control-sm" id="productSize" placeholder="사이즈 입력">
+										        <select class="form-control form-control-sm" id="productSizeStatus">
+										            <option value="0">미진열</option>
+										            <option value="1">진열</option>
+										        </select>
+										        <input type="number" class="form-control form-control-sm" id="productSizePrice" placeholder="가격 입력">
+										        <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addOption('size')">추가</button>
+										        <ul id="sizeList"></ul>
+										    </td>
+										</tr>
+
+										<!-- 추가 상품 옵션 -->
+										<tr>
+										    <th scope="row" class="align-middle">추가 상품</th>
+										    <td>
+										        <input type="text" class="form-control form-control-sm" id="additionalProduct" placeholder="추가 상품 입력 (예: 케이스, 충전기)">
+										        <select class="form-control form-control-sm" id="additionalProductStatus">
+										            <option value="0">미진열</option>
+										            <option value="1">진열</option>
+										        </select>
+										        <input type="number" class="form-control form-control-sm" id="additionalProductPrice" placeholder="가격 입력">
+										        <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addOption('additional')">추가</button>
+										        <ul id="additionalList"></ul>
+										    </td>
+										</tr>
+
+										
+										
+										<!-- 숨겨진 input 태그 -->
+										<input type="hidden" id="productColorValues" name="productColorValues">
+										<input type="hidden" id="productSizeValues" name="productSizeValues">
+										<input type="hidden" id="additionalProductValues" name="additionalProductValues">
+
 										
 										
 
@@ -211,7 +266,101 @@
 			<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 			<!-- jQuery UI JS 추가 -->
 			<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+	// 옵션을 추가하는 함수
+	function addOption(optionType) {
+	    let inputField, statusField, priceField, listElement, hiddenField;
+
+	    // 옵션 타입에 따른 input, status, price, list, hidden input 선택
+	    if (optionType === 'color') {
+	        inputField = document.getElementById('productColor');
+	        statusField = document.getElementById('productColorStatus');
+	        priceField = document.getElementById('productColorPrice');
+	        listElement = document.getElementById('colorList');
+	        hiddenField = document.getElementById('productColorValues');
+	    } else if (optionType === 'size') {
+	        inputField = document.getElementById('productSize');
+	        statusField = document.getElementById('productSizeStatus');
+	        priceField = document.getElementById('productSizePrice');
+	        listElement = document.getElementById('sizeList');
+	        hiddenField = document.getElementById('productSizeValues');
+	    } else if (optionType === 'additional') {
+	        inputField = document.getElementById('additionalProduct');
+	        statusField = document.getElementById('additionalProductStatus');
+	        priceField = document.getElementById('additionalProductPrice');
+	        listElement = document.getElementById('additionalList');
+	        hiddenField = document.getElementById('additionalProductValues');
+	    }
+
+	    let value = inputField.value.trim();  // 입력값을 가져오기
+	    let status = statusField.value;
+	    let price = priceField.value.trim();
+
+	    if (value === '' || price === '') {
+	        alert('옵션 값과 가격을 입력하세요.');
+	        return;
+	    }
+
+	    // 리스트에 추가
+	    let listItem = document.createElement('li');
+	    listItem.textContent = `${value} - ${status === '1' ? '진열' : '미진열'} - ${price}원`;
+
+	    // 삭제 버튼 추가
+	    let deleteButton = document.createElement('button');
+	    deleteButton.textContent = 'X';
+	    deleteButton.classList.add('btn', 'btn-sm', 'btn-danger', 'ml-2');
+	    deleteButton.onclick = function () {
+	        listElement.removeChild(listItem);
+	        updateHiddenValues(hiddenField, listElement);  // 리스트가 수정될 때 hidden input 값을 업데이트
+	    };
+
+	    listItem.appendChild(deleteButton);
+	    listElement.appendChild(listItem);
+
+	    // 리스트 값 업데이트
+	    updateHiddenValues(hiddenField, listElement);
+
+	    // 입력 필드 초기화
+	    inputField.value = '';
+	    priceField.value = '';
+	}
+
+	// hidden input 값을 리스트 항목에 맞게 업데이트
+	function updateHiddenValues(hiddenField, listElement) {
+	    let values = [];
+	    let listItems = listElement.getElementsByTagName('li');
+
+	    // 리스트 항목에서 값을 추출하여 배열에 추가
+	    for (let item of listItems) {
+	        let textContent = item.textContent.replace('X', '').trim();
+	        values.push(textContent);
+	    }
+
+	    // hidden input에 값을 저장 (구분자 | 사용)
+	    hiddenField.value = values.join('|');
+	}
+
+	// 폼 제출 전에 hidden input 값 설정
+	document.querySelector('form').addEventListener('submit', function (e) {
+	    // setHiddenInputValues를 폼 제출 전에 호출
+	    setHiddenInputValues();
+	    
+	    // 폼이 제출되도록 계속 진행
+	});
+
+	// 모든 옵션 값들을 hidden input에 설정
+	function setHiddenInputValues() {
+	    // color, size, 추가 상품 리스트 값들을 각각의 hidden input에 설정
+	    updateHiddenValues(document.getElementById('productColorValues'), document.getElementById('colorList'));
+	    updateHiddenValues(document.getElementById('productSizeValues'), document.getElementById('sizeList'));
+	    updateHiddenValues(document.getElementById('additionalProductValues'), document.getElementById('additionalList'));
+	}
+
+</script>
+
 			
+			
+						
 <script>
 	// 할인율 계산 함수 (비동기 처리 예시)
 	function calculateDiscount() {
@@ -444,6 +593,23 @@
 	    formData.append('productOrigin', document.getElementById('productOrigin').value);
 	    formData.append('createDate', document.getElementById('createDate').value);
 	    formData.append('comments', document.getElementById('comments').value);
+		
+		formData.append('productColorValues', document.getElementById('productColorValues').value);
+		formData.append('productSizeValues', document.getElementById('productSizeValues').value);
+		formData.append('additionalProductValues', document.getElementById('additionalProductValues').value);
+		
+
+		// 동적으로 추가된 옵션들도 추가
+		const optionInputs = document.querySelectorAll("input[name='optionValues[]']");
+		optionInputs.forEach((input, index) => {
+		    formData.append(`optionValues[${index}]`, input.value);
+		});
+
+		console.log([...formData]);  // 값 확인 (테스트용)
+
+		
+		
+		
 
 	    // 이미지 파일 (다중 이미지)
 		const productImages = document.getElementById('productImages').files;
