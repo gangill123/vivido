@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
 
 @Repository
@@ -127,6 +128,11 @@ public class ProductDAOImpl implements ProductDAO {
 	@Override
 	public void insertProductImage(ProductVO productImage) {
 		sqlSession.insert(NAMESPACE + ".insertProductImage", productImage);
+		
+	}
+	@Override
+	public void insertProductOption(ProductOptionVO productOptionVO) {
+		sqlSession.insert(NAMESPACE + ".insertProductOption", productOptionVO);
 		
 	}
 		

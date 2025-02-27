@@ -46,7 +46,7 @@
 	<!-- 상품 정보 조회 -->
 	<select id="getProductById" parameterType="String"
 		resultType="com.vivido.domain.ProductVO">
-SELECT * FROM products WHERE product_id = #{productId} LIMIT 1;
+   SELECT * FROM products WHERE product_id = #{productId} LIMIT 1;
 
 	</select>
 
@@ -194,7 +194,7 @@ SELECT * FROM products WHERE product_id = #{productId} LIMIT 1;
 	        (SELECT COUNT(*) FROM products WHERE product_status = 1) AS displayCount,      <!-- 진열 중인 물품 -->
 	        (SELECT COUNT(*) FROM products WHERE product_status = 0) AS ndisplayCount,   <!-- 미진열 물품 -->
 	        (SELECT COUNT(*) FROM products WHERE product_status = 2) AS outOfStockCount,  <!-- 품절 물품 -->
-	        (SELECT COUNT(*) FROM products WHERE product_status = 3) AS discontinuedCount,<!-- 판매 중지 물품 -->
+	        (SELECT COUNT(*) FROM products WHERE product_status = 3) AS discontinuedCount,<!-- 품절 취소 물품 -->
 	        (SELECT COUNT(*) FROM products) AS totalCount                                 <!-- 전체 물품 -->
 	    FROM DUAL
 	</select>
@@ -237,6 +237,20 @@ SELECT * FROM products WHERE product_id = #{productId} LIMIT 1;
 		#{deliveryMethod}, #{deliveryCompany}, #{deliveryPrice}, #{address}
 		)
 	</insert>
+	
+		<!-- 상품 옵션 등록 -->
+	<insert id="insertProductOption" parameterType="com.vivido.domain.ProductOptionVO">
+		  INSERT INTO product_options (
+		        product_id, option_type, option_value, price, option_status
+		    ) VALUES (
+		        #{productId}, 
+		        #{optionType}, 
+		        #{optionValue}, 
+		        #{price}, 
+		        #{status}
+		    )
+	</insert>
+	
 
 	<!-- 이미지 등록 -->
 	<insert id="insertProductImage" parameterType="com.vivido.domain.ProductVO">

@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.ibatis.annotations.Param;
 
+import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
 
 public interface ProductDAO {
@@ -38,7 +39,10 @@ public interface ProductDAO {
 
     // 상품 등록
     void insertProduct(ProductVO productVO);
+    
+    void insertProductOption(ProductOptionVO productOptionVO);  // 옵션 등록
 
+    
     // 이미지 등록
     void insertProductImage(ProductVO productImage);
     // 이미지 업데이트 
