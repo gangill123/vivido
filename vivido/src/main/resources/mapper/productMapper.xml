@@ -44,11 +44,22 @@
 
 
 	<!-- 상품 정보 조회 -->
-	<select id="getProductById" parameterType="String"
-		resultType="com.vivido.domain.ProductVO">
-   SELECT * FROM products WHERE product_id = #{productId} LIMIT 1;
+<select id="getProductById" parameterType="String" resultType="com.vivido.domain.ProductVO">
+    SELECT 
+        p.*, 
+        pi.*, 
+        po.* 
+    FROM 
+        products p
+    LEFT JOIN 
+        products_image pi ON p.product_id = pi.product_id
+    LEFT JOIN 
+        product_option po ON p.product_id = po.product_id
+    WHERE 
+        p.product_id = #{productId}
+    LIMIT 1;
+</select>
 
-	</select>
 
 	<!-- 상품 수정 -->
 <update id="updateProduct" parameterType="com.vivido.domain.ProductVO">
@@ -90,6 +101,21 @@
     </set>
     WHERE product_id = #{productId}
 </update>
+
+<update id="updateProductOptions" parameterType="java.util.List">
+    <foreach collection="list" item="option" separator=";">
+        UPDATE product_options
+        <set>
+            <if test="option.optionType != null">option_type = #{option.optionType},</if>
+            <if test="option.optionValue != null">option_value = #{option.optionValue},</if>
+            <if test="option.price != null">price = #{option.price},</if>
+            <if test="option.optionStatus != null">option_status = #{option.optionStatus},</if>
+            <if test="option.updatedAt != null">updated_at = #{option.updatedAt},</if>
+        </set>
+        WHERE product_id = #{option.productId} AND option_id = #{option.optionId}
+    </foreach>
+</update>
+
 
 
 
@@ -238,17 +264,15 @@
 		)
 	</insert>
 	
-		<!-- 상품 옵션 등록 -->
-	<insert id="insertProductOption" parameterType="com.vivido.domain.ProductOptionVO">
-		  INSERT INTO product_options (
-		        product_id, option_type, option_value, price, option_status
-		    ) VALUES (
-		        #{productId}, 
-		        #{optionType}, 
-		        #{optionValue}, 
-		        #{price}, 
-		        #{status}
-		    )
+	    <!-- 단일 옵션 삽입 -->
+	<insert id="insertProductOption" parameterType="java.util.List">
+	    INSERT INTO product_options (
+	        product_id, option_type, option_value, price, option_status
+	    )
+	    VALUES 
+	    <foreach collection="list" item="option" separator=",">
+	        (#{option.productId}, #{option.optionType}, #{option.optionValue}, #{option.price}, #{option.optionStatus})
+	    </foreach>
 	</insert>
 	
 

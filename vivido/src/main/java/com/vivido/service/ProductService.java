@@ -1,12 +1,11 @@
 package com.vivido.service;
 
 import java.util.List;
+
 import java.util.Map;
 
 import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
-
-import jakarta.servlet.http.HttpServletResponse;
 
 
 public interface ProductService {

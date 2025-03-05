@@ -116,7 +116,17 @@ public class ProductDAOImpl implements ProductDAO {
 	     // MyBatis에서 SQL 쿼리를 실행하여 상품 상태를 변경
 	     sqlSession.update(NAMESPACE + ".updateProductStatus", paramMap);
 	 }
-
+	 
+	 @Override
+	 public void updateProductOptions(List<ProductOptionVO> productOptions) {
+		    try {
+		        // 상품 옵션 목록을 업데이트
+		        sqlSession.update(NAMESPACE + "updateProductOptions", productOptions);
+		    } catch (Exception e) {
+		        e.printStackTrace();
+		    }
+		}
+	 
 	 
 	
 	
@@ -131,11 +141,20 @@ public class ProductDAOImpl implements ProductDAO {
 		
 	}
 	@Override
-	public void insertProductOption(ProductOptionVO productOptionVO) {
-		sqlSession.insert(NAMESPACE + ".insertProductOption", productOptionVO);
-		
+	public void insertProductOption(List<ProductOptionVO> productOptions) {
+	    try {
+	        // 매개변수 로그 출력
+	        System.out.println("Inserting Product Options: " + productOptions);
+
+	        // SQL 실행: 여러 옵션을 한 번에 삽입
+	        sqlSession.insert(NAMESPACE + ".insertProductOption", productOptions);
+	    } catch (Exception e) {
+	        // 예외 처리
+	        e.printStackTrace(); // 예외 스택 트레이스 출력
+	    }
 	}
-		
+	
+    
 	
 	
 	
