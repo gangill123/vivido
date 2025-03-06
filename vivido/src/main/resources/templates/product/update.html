@@ -185,13 +185,11 @@
 										</tr>
 
 										
-										
+
 										<!-- 숨겨진 input 태그 -->
 										<input type="hidden" id="productColorValues" name="productColorValues">
 										<input type="hidden" id="productSizeValues" name="productSizeValues">
 										<input type="hidden" id="additionalProductValues" name="additionalProductValues">
-
-										
 										
 										
 										
@@ -254,6 +252,7 @@
 			    </div>
 			</div>
 
+		
 
 
 			<!-- Summernote CSS -->
@@ -450,53 +449,60 @@
 
 
 <script>
-    window.onload = function() {
-        const params = new URLSearchParams(window.location.search);
+	window.onload = function() {
+	    // 세션 스토리지에서 상품 데이터 가져오기
+	    const productData = JSON.parse(sessionStorage.getItem('productData'));
 
-        // ID 값이 있는 요소만 업데이트하도록 수정
-        const fields = ["productId", "productName", "productPrice", "productStock", 
-                        "productKeyword", "brand", "manufacturer", "productOrigin",
-                        "deliveryMethod", "deliveryCompany", "deliveryPrice", "address",
-                        "productContent", "comments", "createDate"];
+	    // 세션 스토리지에서 데이터가 있을 경우
+	    if (productData) {
+	        // 기본 상품 정보 폼 필드에 데이터 채우기
+	        const fields = [
+	            "productId", "productName", "productPrice", "productStock", 
+	            "productKeyword", "brand", "manufacturer", "productOrigin",
+	            "deliveryMethod", "deliveryCompany", "deliveryPrice", "address",
+	            "productContent", "comments", "createDate","discountedPrice","discountRate"
+	        ];
 
-        fields.forEach(field => {
-            const element = document.getElementById(field);
-            if (element) {
-                const value = params.get(field);
-                if (value !== null) {
-                    element.value = value;
-                }
-            }
-        });
-    };
-	
-	
-	// 카테고리 
-	function updateSubCategory() {
-	    const categoryDetails = document.getElementById("productCategoryDetails");
-	    const category = document.getElementById("productCategory").value;
+	        fields.forEach(field => {
+	            const element = document.getElementById(field);
+	            if (element && productData[field] !== undefined) {
+	                element.value = productData[field];  // 서버에서 받은 값으로 채움
+	            }
+	        });
 
-	    // 기존 옵션 초기화
-	    categoryDetails.innerHTML = '<option value="">세분류 선택</option>';
+	        // 색상, 사이즈, 추가 상품 관련 데이터 채우기
+	        // 색상 관련 데이터 채우기
+	        if (productData.productColor) {
+	            document.getElementById('productColor').value = productData.productColor.name || '';  // 색상 이름
+	            document.getElementById('productColorStatus').value = productData.productColor.status || 0;  // 상태 (미진열: 0, 진열: 1)
+	            document.getElementById('productColorPrice').value = productData.productColor.price || '';  // 가격
+	            // 숨겨진 필드에 저장할 값 설정
+	            document.getElementById('productColorValues').value = JSON.stringify(productData.productColor);
+	        }
 
-	    let subCategories = [];
-	    if (category === "electronics") {
-	        subCategories = ["스마트폰", "노트북", "태블릿", "TV"];
-	    } else if (category === "clothing") {
-	        subCategories = ["남성 의류", "여성 의류", "아동 의류"];
-	    } else if (category === "books") {
-	        subCategories = ["소설", "자기계발", "만화", "잡지"];
+	        // 사이즈 관련 데이터 채우기
+	        if (productData.productSize) {
+	            document.getElementById('productSize').value = productData.productSize.name || '';  // 사이즈 이름
+	            document.getElementById('productSizeStatus').value = productData.productSize.status || 0;  // 상태
+	            document.getElementById('productSizePrice').value = productData.productSize.price || '';  // 가격
+	            // 숨겨진 필드에 저장할 값 설정
+	            document.getElementById('productSizeValues').value = JSON.stringify(productData.productSize);
+	        }
+
+	        // 추가 상품 관련 데이터 채우기
+	        if (productData.additionalProduct) {
+	            document.getElementById('additionalProduct').value = productData.additionalProduct.name || '';  // 추가 상품 이름
+	            document.getElementById('additionalProductStatus').value = productData.additionalProduct.status || 0;  // 상태
+	            document.getElementById('additionalProductPrice').value = productData.additionalProduct.price || '';  // 가격
+	            // 숨겨진 필드에 저장할 값 설정
+	            document.getElementById('additionalProductValues').value = JSON.stringify(productData.additionalProduct);
+	        }
 	    }
+	};
 
-	    subCategories.forEach(sub => {
-	        const option = document.createElement("option");
-	        option.value = sub;
-	        option.textContent = sub;
-	        categoryDetails.appendChild(option);
-	    });
 
-	    categoryDetails.style.display = subCategories.length > 0 ? "block" : "none";
-	}
+
+
 	
 
 	

@@ -521,16 +521,20 @@
 
 			// 상품 수정 함수 (수정페이지로 데이터 들고 이동하는 로직)
 			function editProduct(productId) {
-			    // 상품 상세 정보를 불러와서 수정 페이지로 이동
 			    fetch(`/management/products/${productId}`)
 			        .then(response => response.json())
 			        .then(product => {
-			            // URL을 구성하여 수정 페이지로 이동하면서 상품 정보를 전달
-			            const queryString = new URLSearchParams(product).toString();
-			            window.location.href = `/update?${queryString}`;
+			            // 세션 스토리지에 상품 정보 저장
+			            sessionStorage.setItem('productData', JSON.stringify(product));
+
+			            // 수정 페이지로 이동
+			            window.location.href = '/update';  // 수정 페이지로 이동
 			        })
-			        .catch(error => console.error('상품 정보를 불러오는 중 오류 발생:', error));
+			        .catch(error => {
+			            console.error('상품 정보를 불러오는 중 오류 발생:', error);
+			        });
 			}
+
 			
 			
 			

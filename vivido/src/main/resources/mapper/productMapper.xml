@@ -45,19 +45,42 @@
 
 	<!-- 상품 정보 조회 -->
 <select id="getProductById" parameterType="String" resultType="com.vivido.domain.ProductVO">
-    SELECT 
-        p.*, 
-        pi.*, 
-        po.* 
-    FROM 
-        products p
-    LEFT JOIN 
-        products_image pi ON p.product_id = pi.product_id
-    LEFT JOIN 
-        product_option po ON p.product_id = po.product_id
-    WHERE 
-        p.product_id = #{productId}
-    LIMIT 1;
+  SELECT 
+    p.product_id, 
+    p.product_name, 
+    p.product_price, 
+    p.product_stock, 
+    p.product_keyword,
+    p.brand, 
+    p.manufacturer, 
+    p.product_origin, 
+    p.delivery_method, 
+    p.delivery_company, 
+    p.delivery_price, 
+    p.address, 
+    p.product_content, 
+    p.comments, 
+    p.create_date, 
+    p.discounted_price, 
+    pi.image_id, 
+    pi.image_url, 
+    pi.thumbnail_url, 
+    pi.is_primary, 
+    pi.created_at,
+    po.option_id,
+    po.option_type,
+    po.option_value,
+    po.price,
+    po.option_status
+FROM 
+    products p
+LEFT JOIN 
+    product_image pi ON p.product_id = pi.product_id
+LEFT JOIN 
+    product_options po ON p.product_id = po.product_id
+WHERE 
+    p.product_id = #{productId}
+
 </select>
 
 
