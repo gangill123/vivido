@@ -85,15 +85,16 @@ public class ProductVO {
     }
     
     // 상품 옵션 리스트 추가
-    public List<ProductOptionVO> productOptions;
+    private ProductImageVO productImage;
+    private List<ProductOptionVO> productOptions;
+    
     
     // Getter & Setter
     public List<ProductOptionVO> getProductOptions() { return productOptions; }
     public void setProductOptions(List<ProductOptionVO> productOptions) { this.productOptions = productOptions; }
     
     
-    
-    
+
     
     // 카테고리와 세분류를 받을 수 있는 생성자 추가
     public ProductVO(String productCategory, String productCategoryDetails) {

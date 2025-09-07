@@ -2,25 +2,22 @@ package com.vivido.service;
 
 
 import java.io.ByteArrayOutputStream;
+
+
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.time.ZoneId;
-import java.util.Date;
+
 import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
 
-import org.apache.poi.ss.usermodel.BorderStyle;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +28,6 @@ import com.vivido.domain.ProductOptionVO;
 import com.vivido.domain.ProductVO;
 import com.vivido.repository.ProductDAO;
 
-import jakarta.servlet.http.HttpServletResponse;
 
 @Service
 public class ProductServiceImpl implements ProductService {
@@ -72,6 +68,12 @@ public class ProductServiceImpl implements ProductService {
         if (product.getImageUrl() != null || product.getThumbnailUrl() != null) {
             productDAO.updateProductImages(product);
         }
+     // 상품 옵션 업데이트 (옵션이 존재하면)
+        if (product.getProductOptions() != null && !product.getProductOptions().isEmpty()) {
+            productDAO.updateProductOptions(product.getProductOptions());
+        }
+        
+        
     }
 
 	// 상품 목록 페이징 처리
@@ -332,23 +334,26 @@ public class ProductServiceImpl implements ProductService {
 
 	////////////////////////////상품 등록 페이지 시작////////////////////////////////
 	 // 상품 등록
-	@Override
-	   public void registerProduct(ProductVO productVO, List<ProductVO> productImages, List<ProductOptionVO> productOptions) {
-        // 상품 등록
-        productDAO.insertProduct(productVO);
+	  
+	  	@Transactional
+		@Override
+		public void registerProduct(ProductVO productVO, List<ProductVO> productImages, List<ProductOptionVO> productOptions) {
+		    // 상품 등록
+		    productDAO.insertProduct(productVO);
+		
+		    // 이미지 등록
+		    for (ProductVO productImage : productImages) {
+		        productDAO.insertProductImage(productImage);
+		    }
+		
 
-        // 이미지 등록
-        for (ProductVO productImage : productImages) {
-            productDAO.insertProductImage(productImage);
-        }
-        // 2. 옵션 정보 저장 (옵션이 있는 경우)
-        if (productOptions != null && !productOptions.isEmpty()) {
-            for (ProductOptionVO option : productOptions) {
-                productDAO.insertProductOption(option);
-            }
-        }
-        
-    
+		    // 옵션 정보 저장 (옵션이 있는 경우)
+		    if (productOptions != null && !productOptions.isEmpty()) {
+		        productDAO.insertProductOption(productOptions); // 여러 옵션을 한 번에 전달
+		    }
+		    
+
+	    
     }
 	
 	

@@ -136,6 +136,62 @@
 										</tr>
 										
 										
+										<!-- 상품 옵션 -->
+										<tr><th colspan="2" class="bg-light text-center">🎨 상품 옵션</th></tr>
+
+										<!-- 색상 옵션 -->
+										<tr>
+										    <th scope="row" class="align-middle">색상 선택</th>
+										    <td>
+										        <input type="text" class="form-control form-control-sm" id="productColor" placeholder="색상 입력">
+										        <select class="form-control form-control-sm" id="productColorStatus">
+										            <option value="0">미진열</option>
+										            <option value="1">진열</option>
+										        </select>
+										        <input type="number" class="form-control form-control-sm" id="productColorPrice" placeholder="가격 입력">
+										        <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addOption('color')">추가</button>
+										        <ul id="colorList"></ul>
+										    </td>
+										</tr>
+
+										<!-- 사이즈 옵션 -->
+										<tr>
+										    <th scope="row" class="align-middle">사이즈 선택</th>
+										    <td>
+										        <input type="text" class="form-control form-control-sm" id="productSize" placeholder="사이즈 입력">
+										        <select class="form-control form-control-sm" id="productSizeStatus">
+										            <option value="0">미진열</option>
+										            <option value="1">진열</option>
+										        </select>
+										        <input type="number" class="form-control form-control-sm" id="productSizePrice" placeholder="가격 입력">
+										        <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addOption('size')">추가</button>
+										        <ul id="sizeList"></ul>
+										    </td>
+										</tr>
+
+										<!-- 추가 상품 옵션 -->
+										<tr>
+										    <th scope="row" class="align-middle">추가 상품</th>
+										    <td>
+										        <input type="text" class="form-control form-control-sm" id="additionalProduct" placeholder="추가 상품 입력 (예: 케이스, 충전기)">
+										        <select class="form-control form-control-sm" id="additionalProductStatus">
+										            <option value="0">미진열</option>
+										            <option value="1">진열</option>
+										        </select>
+										        <input type="number" class="form-control form-control-sm" id="additionalProductPrice" placeholder="가격 입력">
+										        <button type="button" class="btn btn-sm btn-primary mt-1" onclick="addOption('additional')">추가</button>
+										        <ul id="additionalList"></ul>
+										    </td>
+										</tr>
+
+										
+
+										<!-- 숨겨진 input 태그 -->
+										<input type="hidden" id="productColorValues" name="productColorValues">
+										<input type="hidden" id="productSizeValues" name="productSizeValues">
+										<input type="hidden" id="additionalProductValues" name="additionalProductValues">
+										
+										
 										
 										
 
@@ -196,6 +252,7 @@
 			    </div>
 			</div>
 
+		
 
 
 			<!-- Summernote CSS -->
@@ -211,7 +268,100 @@
 			<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
 			<!-- jQuery UI JS 추가 -->
 			<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+	// 옵션을 추가하는 함수
+		function addOption(optionType) {
+		    let inputField, statusField, priceField, listElement, hiddenField;
+
+		    // 옵션 타입에 따른 input, status, price, list, hidden input 선택
+		    if (optionType === 'color') {
+		        inputField = document.getElementById('productColor');
+		        statusField = document.getElementById('productColorStatus');
+		        priceField = document.getElementById('productColorPrice');
+		        listElement = document.getElementById('colorList');
+		        hiddenField = document.getElementById('productColorValues');
+		    } else if (optionType === 'size') {
+		        inputField = document.getElementById('productSize');
+		        statusField = document.getElementById('productSizeStatus');
+		        priceField = document.getElementById('productSizePrice');
+		        listElement = document.getElementById('sizeList');
+		        hiddenField = document.getElementById('productSizeValues');
+		    } else if (optionType === 'additional') {
+		        inputField = document.getElementById('additionalProduct');
+		        statusField = document.getElementById('additionalProductStatus');
+		        priceField = document.getElementById('additionalProductPrice');
+		        listElement = document.getElementById('additionalList');
+		        hiddenField = document.getElementById('additionalProductValues');
+		    }
+
+		    let value = inputField.value.trim();  // 입력값을 가져오기
+		    let status = statusField.value;
+		    let price = priceField.value.trim();
+
+		    if (value === '' || price === '') {
+		        alert('옵션 값과 가격을 입력하세요.');
+		        return;
+		    }
+
+		    // 리스트에 추가
+		    let listItem = document.createElement('li');
+		    listItem.textContent = `${value} - ${status === '1' ? '진열' : '미진열'} - ${price}원`;
+
+		    // 삭제 버튼 추가
+		    let deleteButton = document.createElement('button');
+		    deleteButton.textContent = 'X';
+		    deleteButton.classList.add('btn', 'btn-sm', 'btn-danger', 'ml-2');
+		    deleteButton.onclick = function () {
+		        listElement.removeChild(listItem);
+		        updateHiddenValues(hiddenField, listElement);  // 리스트가 수정될 때 hidden input 값을 업데이트
+		    };
+
+		    listItem.appendChild(deleteButton);
+		    listElement.appendChild(listItem);
+
+		    // 리스트 값 업데이트
+		    updateHiddenValues(hiddenField, listElement);
+
+		    // 입력 필드 초기화
+		    inputField.value = '';
+		    priceField.value = '';
+		}
+
+		// hidden input 값을 리스트 항목에 맞게 업데이트
+		function updateHiddenValues(hiddenField, listElement) {
+		    let values = [];
+		    let listItems = listElement.getElementsByTagName('li');
+
+		    // 리스트 항목에서 값을 추출하여 배열에 추가
+		    for (let item of listItems) {
+		        let textContent = item.textContent.replace('X', '').trim();
+		        values.push(textContent);
+		    }
+
+		    // hidden input에 값을 저장 (구분자 | 사용)
+		    hiddenField.value = values.join('|');
+		}
+
+		// 폼 제출 전에 hidden input 값 설정
+		document.querySelector('form').addEventListener('submit', function (e) {
+		    // setHiddenInputValues를 폼 제출 전에 호출
+		    setHiddenInputValues();
+		    
+		    // 폼이 제출되도록 계속 진행
+		});
+
+		// 모든 옵션 값들을 hidden input에 설정
+		function setHiddenInputValues() {
+		    // color, size, 추가 상품 리스트 값들을 각각의 hidden input에 설정
+		    updateHiddenValues(document.getElementById('productColorValues'), document.getElementById('colorList'));
+		    updateHiddenValues(document.getElementById('productSizeValues'), document.getElementById('sizeList'));
+		    updateHiddenValues(document.getElementById('additionalProductValues'), document.getElementById('additionalList'));
+		}
+
+</script>
 			
+			
+						
 <script>
 	// 할인율 계산 함수 (비동기 처리 예시)
 	function calculateDiscount() {
@@ -299,53 +449,60 @@
 
 
 <script>
-    window.onload = function() {
-        const params = new URLSearchParams(window.location.search);
+	window.onload = function() {
+	    // 세션 스토리지에서 상품 데이터 가져오기
+	    const productData = JSON.parse(sessionStorage.getItem('productData'));
 
-        // ID 값이 있는 요소만 업데이트하도록 수정
-        const fields = ["productId", "productName", "productPrice", "productStock", 
-                        "productKeyword", "brand", "manufacturer", "productOrigin",
-                        "deliveryMethod", "deliveryCompany", "deliveryPrice", "address",
-                        "productContent", "comments", "createDate"];
+	    // 세션 스토리지에서 데이터가 있을 경우
+	    if (productData) {
+	        // 기본 상품 정보 폼 필드에 데이터 채우기
+	        const fields = [
+	            "productId", "productName", "productPrice", "productStock", 
+	            "productKeyword", "brand", "manufacturer", "productOrigin",
+	            "deliveryMethod", "deliveryCompany", "deliveryPrice", "address",
+	            "productContent", "comments", "createDate","discountedPrice","discountRate"
+	        ];
 
-        fields.forEach(field => {
-            const element = document.getElementById(field);
-            if (element) {
-                const value = params.get(field);
-                if (value !== null) {
-                    element.value = value;
-                }
-            }
-        });
-    };
-	
-	
-	// 카테고리 
-	function updateSubCategory() {
-	    const categoryDetails = document.getElementById("productCategoryDetails");
-	    const category = document.getElementById("productCategory").value;
+	        fields.forEach(field => {
+	            const element = document.getElementById(field);
+	            if (element && productData[field] !== undefined) {
+	                element.value = productData[field];  // 서버에서 받은 값으로 채움
+	            }
+	        });
 
-	    // 기존 옵션 초기화
-	    categoryDetails.innerHTML = '<option value="">세분류 선택</option>';
+	        // 색상, 사이즈, 추가 상품 관련 데이터 채우기
+	        // 색상 관련 데이터 채우기
+	        if (productData.productColor) {
+	            document.getElementById('productColor').value = productData.productColor.name || '';  // 색상 이름
+	            document.getElementById('productColorStatus').value = productData.productColor.status || 0;  // 상태 (미진열: 0, 진열: 1)
+	            document.getElementById('productColorPrice').value = productData.productColor.price || '';  // 가격
+	            // 숨겨진 필드에 저장할 값 설정
+	            document.getElementById('productColorValues').value = JSON.stringify(productData.productColor);
+	        }
 
-	    let subCategories = [];
-	    if (category === "electronics") {
-	        subCategories = ["스마트폰", "노트북", "태블릿", "TV"];
-	    } else if (category === "clothing") {
-	        subCategories = ["남성 의류", "여성 의류", "아동 의류"];
-	    } else if (category === "books") {
-	        subCategories = ["소설", "자기계발", "만화", "잡지"];
+	        // 사이즈 관련 데이터 채우기
+	        if (productData.productSize) {
+	            document.getElementById('productSize').value = productData.productSize.name || '';  // 사이즈 이름
+	            document.getElementById('productSizeStatus').value = productData.productSize.status || 0;  // 상태
+	            document.getElementById('productSizePrice').value = productData.productSize.price || '';  // 가격
+	            // 숨겨진 필드에 저장할 값 설정
+	            document.getElementById('productSizeValues').value = JSON.stringify(productData.productSize);
+	        }
+
+	        // 추가 상품 관련 데이터 채우기
+	        if (productData.additionalProduct) {
+	            document.getElementById('additionalProduct').value = productData.additionalProduct.name || '';  // 추가 상품 이름
+	            document.getElementById('additionalProductStatus').value = productData.additionalProduct.status || 0;  // 상태
+	            document.getElementById('additionalProductPrice').value = productData.additionalProduct.price || '';  // 가격
+	            // 숨겨진 필드에 저장할 값 설정
+	            document.getElementById('additionalProductValues').value = JSON.stringify(productData.additionalProduct);
+	        }
 	    }
+	};
 
-	    subCategories.forEach(sub => {
-	        const option = document.createElement("option");
-	        option.value = sub;
-	        option.textContent = sub;
-	        categoryDetails.appendChild(option);
-	    });
 
-	    categoryDetails.style.display = subCategories.length > 0 ? "block" : "none";
-	}
+
+
 	
 
 	
@@ -436,6 +593,13 @@
 	    formData.append("productContent", document.getElementById("productContent").value);
 	    formData.append("comments", document.getElementById("comments").value);
 	    formData.append("createDate", document.getElementById("createDate").value);
+		
+		// 추가하려는 옵션들
+
+		formData.append('productColorValues', document.getElementById('productColorValues').value);
+		formData.append('productSizeValues', document.getElementById('productSizeValues').value);
+		formData.append('additionalProductValues', document.getElementById('additionalProductValues').value);
+
 
 	    // 이미지 파일들 추가 (파일이 선택되었을 경우)
 	    const productImages = document.getElementById("productImages").files;

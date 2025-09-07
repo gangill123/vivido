@@ -7,8 +7,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.ContentDisposition;
+import org.apache.logging.log4j.LogManager;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayOutputStream;
@@ -91,6 +93,9 @@ public class ProductRestController {
 
 	@Autowired
 	private ProductService productService;
+	
+	
+	private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(ProductRestController.class);
 
 	//////////////////////////// 상품 목록 페이지 시작////////////////////////////////
 
@@ -128,7 +133,7 @@ public class ProductRestController {
 			return ResponseEntity.notFound().build(); // 404 Not Found
 		}
 	}
-
+ 
 	// 상품 정보 조회 API
 	@GetMapping("/{productId}")
 	public ResponseEntity<ProductVO> getProductInfo(@PathVariable String productId) {
@@ -157,7 +162,16 @@ public class ProductRestController {
 	        @RequestParam("deliveryMethod") String deliveryMethod,
 	        @RequestParam("deliveryCompany") String deliveryCompany,
 	        @RequestParam(value = "discountedPrice", defaultValue = "0") int deliveryPrice,
-	        @RequestParam("address") String address) {
+	        @RequestParam("address") String address,
+		    @RequestParam(value = "productColorValues") String productColorValues,
+		    @RequestParam(value = "productSizeValues") String productSizeValues,
+		    @RequestParam(value = "additionalProductValues") String additionalProductValues	
+	
+			
+			
+			
+			) 
+		{
 	    
 	    Map<String, String> response = new HashMap<>();
 
@@ -188,6 +202,93 @@ public class ProductRestController {
 	    existingProduct.setDeliveryCompany(deliveryCompany);
 	    existingProduct.setDeliveryPrice(deliveryPrice);
 	    existingProduct.setAddress(address);
+	    
+	    
+	    
+	    
+	    
+	    
+	    List<ProductOptionVO> productOptions = new ArrayList<>();
+
+
+	    // 색상 옵션 처리
+	    if (productColorValues != null && !productColorValues.isEmpty()) {
+	        String[] colors = productColorValues.split("\\|");
+	        for (String color : colors) {
+	            String[] details = color.split(" - ");
+	            if (details.length < 2) continue;
+
+	            String optionValue = details[0].trim();
+	            int optionStatus = "진열".equals(details[1].trim()) ? 1 : 0;
+	            int price = 0;
+
+	            try {
+	                if (details.length == 3) {
+	                    price = Integer.parseInt(details[2].replace("원", "").replace(",", "").trim());
+	                }
+	            } catch (NumberFormatException e) {
+	                logger.error("가격 변환 에러: {}", e.getMessage());
+	            }
+
+	            productOptions.add(new ProductOptionVO(productId, OptionType.COLOR, optionValue, price, optionStatus));
+	        }
+	    }
+
+	    // 사이즈 옵션 처리
+	    if (productSizeValues != null && !productSizeValues.isEmpty()) {
+	        String[] sizes = productSizeValues.split("\\|");
+	        for (String size : sizes) {
+	            String[] details = size.split(" - ");
+	            if (details.length < 2) continue;
+
+	            String optionValue = details[0].trim();
+	            int optionStatus = "진열".equals(details[1].trim()) ? 1 : 0;
+	            int price = 0;
+
+	            try {
+	                if (details.length == 3) {
+	                    price = Integer.parseInt(details[2].replace("원", "").replace(",", "").trim());
+	                }
+	            } catch (NumberFormatException e) {
+	                logger.error("가격 변환 에러: {}", e.getMessage());
+	            }
+
+	            productOptions.add(new ProductOptionVO(productId, OptionType.SIZE, optionValue, price, optionStatus));
+	        }
+	    }
+
+	    // 추가 상품 옵션 처리
+	    if (additionalProductValues != null && !additionalProductValues.isEmpty()) {
+	        String[] additionalOptions = additionalProductValues.split("\\|");
+	        for (String additional : additionalOptions) {
+	            String[] details = additional.split(" - ");
+	            if (details.length < 2) continue;
+
+	            String optionValue = details[0].trim();
+	            int optionStatus = "진열".equals(details[1].trim()) ? 1 : 0;
+	            int price = 0;
+
+	            try {
+	                if (details.length == 3) {
+	                    price = Integer.parseInt(details[2].replace("원", "").replace(",", "").trim());
+	                }
+	            } catch (NumberFormatException e) {
+	                logger.error("가격 변환 에러: {}", e.getMessage());
+	            }
+
+	            productOptions.add(new ProductOptionVO(productId, OptionType.ADDITIONAL, optionValue, price, optionStatus));
+	        }
+	    }
+
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
+	    
 
 	    // 이미지 파일 저장 및 업데이트
 	    if (productImages != null && productImages.length > 0) {
@@ -327,21 +428,7 @@ public class ProductRestController {
 
 //////////////////////////// 상품 등록 페이지 시작////////////////////////////////
 	 
-	 private void parseOptions(List<ProductOptionVO> options, List<String> optionList, String productId, OptionType optionType) {
-		    for (String option : optionList) {
-		        try {
-		            String[] data = option.split(" - ");
-		            if (data.length == 3) {
-		                String name = data[0];
-		                int status = "진열".equals(data[1]) ? 1 : 0;
-		                int price = Integer.parseInt(data[2].replace("원", "").trim());
-		                options.add(new ProductOptionVO(0, productId, optionType, name, status, price));
-		            }
-		        } catch (Exception e) {
-		            System.out.println("옵션 데이터 파싱 실패: " + option);
-		        }
-		    }
-		}
+
 	 
 	@PostMapping("/register")
 	public ResponseEntity<Map<String, String>> registerProduct(
@@ -365,11 +452,10 @@ public class ProductRestController {
 	        @RequestParam("deliveryCompany") String deliveryCompany,
 	        @RequestParam("deliveryPrice") int deliveryPrice,
 	        @RequestParam("address") String address,
-	        @RequestParam(value = "productColor", required = false) String productColor,
-	        @RequestParam(value = "productSize", required = false) String productSize,
-	        @RequestParam(value = "additionalProduct", required = false) String additionalProduct,
+	        @RequestParam(value = "productColorValues") String productColorValues,
+	        @RequestParam(value = "productSizeValues") String productSizeValues,
+	        @RequestParam(value = "additionalProductValues") String additionalProductValues
 
-	        @RequestParam(value = "optionValues", required = false) String[] optionValues
 
 	        
 	) {
@@ -399,62 +485,78 @@ public class ProductRestController {
 	    productVO.setAddress(address);
 	    
 	    
-	    // 색상, 사이즈, 추가 상품 옵션 리스트 초기화
-        List<String> colorList = productColor != null ? Arrays.asList(productColor.split("\\|")) : new ArrayList<>();
-        List<String> sizeList = productSize != null ? Arrays.asList(productSize.split("\\|")) : new ArrayList<>();
-        List<String> additionalList = additionalProduct != null ? Arrays.asList(additionalProduct.split("\\|")) : new ArrayList<>();
+	    List<ProductOptionVO> productOptions = new ArrayList<>();
 
-        // 옵션 정보 추가
-        List<ProductOptionVO> productOptions = new ArrayList<>();
-     // 색상 옵션 추가 전
-        for (String color : colorList) {
-            String[] data = color.trim().split(" - ");
-            if (data.length < 3) continue;
-            try {
-                String name = data[0].trim();
-                int status = "진열".equals(data[1].trim()) ? 1 : 0;
-                int price = Integer.parseInt(data[2].trim().replace("원", "").replace(",", ""));
-                productOptions.add(new ProductOptionVO(0, productId, OptionType.COLOR, name, price, status));
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid price format for color: " + color);
-            }
-        }
 
-        for (String size : sizeList) {
-            String[] data = size.trim().split(" - ");
-            if (data.length < 3) continue;
-            try {
-                String name = data[0].trim();
-                int status = "진열".equals(data[1].trim()) ? 1 : 0;
-                int price = Integer.parseInt(data[2].trim().replace("원", "").replace(",", ""));
-                productOptions.add(new ProductOptionVO(0, productId, OptionType.SIZE, name, price, status));
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid price format for size: " + size);
-            }
-        }
+	    // 색상 옵션 처리
+	    if (productColorValues != null && !productColorValues.isEmpty()) {
+	        String[] colors = productColorValues.split("\\|");
+	        for (String color : colors) {
+	            String[] details = color.split(" - ");
+	            if (details.length < 2) continue;
 
-        for (String additional : additionalList) {
-            String[] data = additional.trim().split(" - ");
-            if (data.length < 3) continue;
-            try {
-                String name = data[0].trim();
-                int status = "진열".equals(data[1].trim()) ? 1 : 0;
-                int price = Integer.parseInt(data[2].trim().replace("원", "").replace(",", ""));
-                productOptions.add(new ProductOptionVO(0, productId, OptionType.ADDITIONAL, name, price, status));
-            } catch (NumberFormatException e) {
-                System.out.println("Invalid price format for additional product: " + additional);
-            }
-        }
+	            String optionValue = details[0].trim();
+	            int optionStatus = "진열".equals(details[1].trim()) ? 1 : 0;
+	            int price = 0;
 
-        // 중복 제거 후 추가
-        Set<String> uniqueOptions = new HashSet<>();
-        if (optionValues != null) {
-            for (String optionValue : optionValues) {
-                if (uniqueOptions.add(optionValue.trim())) {
-                    productOptions.add(new ProductOptionVO(0, productId, OptionType.ADDITIONAL, optionValue.trim(), 0, 1));
-                }
-            }
-        }
+	            try {
+	                if (details.length == 3) {
+	                    price = Integer.parseInt(details[2].replace("원", "").replace(",", "").trim());
+	                }
+	            } catch (NumberFormatException e) {
+	                logger.error("가격 변환 에러: {}", e.getMessage());
+	            }
+
+	            productOptions.add(new ProductOptionVO(productId, OptionType.COLOR, optionValue, price, optionStatus));
+	        }
+	    }
+
+	    // 사이즈 옵션 처리
+	    if (productSizeValues != null && !productSizeValues.isEmpty()) {
+	        String[] sizes = productSizeValues.split("\\|");
+	        for (String size : sizes) {
+	            String[] details = size.split(" - ");
+	            if (details.length < 2) continue;
+
+	            String optionValue = details[0].trim();
+	            int optionStatus = "진열".equals(details[1].trim()) ? 1 : 0;
+	            int price = 0;
+
+	            try {
+	                if (details.length == 3) {
+	                    price = Integer.parseInt(details[2].replace("원", "").replace(",", "").trim());
+	                }
+	            } catch (NumberFormatException e) {
+	                logger.error("가격 변환 에러: {}", e.getMessage());
+	            }
+
+	            productOptions.add(new ProductOptionVO(productId, OptionType.SIZE, optionValue, price, optionStatus));
+	        }
+	    }
+
+	    // 추가 상품 옵션 처리
+	    if (additionalProductValues != null && !additionalProductValues.isEmpty()) {
+	        String[] additionalOptions = additionalProductValues.split("\\|");
+	        for (String additional : additionalOptions) {
+	            String[] details = additional.split(" - ");
+	            if (details.length < 2) continue;
+
+	            String optionValue = details[0].trim();
+	            int optionStatus = "진열".equals(details[1].trim()) ? 1 : 0;
+	            int price = 0;
+
+	            try {
+	                if (details.length == 3) {
+	                    price = Integer.parseInt(details[2].replace("원", "").replace(",", "").trim());
+	                }
+	            } catch (NumberFormatException e) {
+	                logger.error("가격 변환 에러: {}", e.getMessage());
+	            }
+
+	            productOptions.add(new ProductOptionVO(productId, OptionType.ADDITIONAL, optionValue, price, optionStatus));
+	        }
+	    }
+
 
 
 		// 이미지 파일 저장 및 썸네일 생성

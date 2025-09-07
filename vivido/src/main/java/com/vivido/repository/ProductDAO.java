@@ -40,8 +40,8 @@ public interface ProductDAO {
     // 상품 등록
     void insertProduct(ProductVO productVO);
     
-    void insertProductOption(ProductOptionVO productOptionVO);  // 옵션 등록
-
+    public void insertProductOption(List<ProductOptionVO> productOptions);
+    
     
     // 이미지 등록
     void insertProductImage(ProductVO productImage);
@@ -49,6 +49,8 @@ public interface ProductDAO {
 	void updateProductImages(ProductVO product);
 
 	public void updateProductStatus(String productId, int status);
+
+	void updateProductOptions(List<ProductOptionVO> productOptions);
 
 	
 
